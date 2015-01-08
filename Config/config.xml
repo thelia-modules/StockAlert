@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <forms>
+        <form name="stockalert.subscribe.form" class="StockAlert\Form\StockAlertSubscribe" />
+        <form name= "stockalert.configuration.form" class="StockAlert\Form\StockAlertConfig" />
+    </forms>
+
+    <services>
+        <service id="stockalert.alert.manager" class="StockAlert\EventListeners\StockAlertManager" scope="request">
+            <argument type="service" id="thelia.parser" />
+            <argument type="service" id="mailer"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+    </services>
+
+    <hooks>
+        <hook id="stockalert.hook" class="StockAlert\Hook\StockAlertHook" scope="request">
+            <tag name="hook.event_listener" event="module.configuration" type="back" />
+        </hook>
+    </hooks>
+</config>

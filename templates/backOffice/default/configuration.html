@@ -1,0 +1,45 @@
+<!-- Configuration -->
+<div class="general-block-decorator">
+    <div class="row">
+
+        <div class="col-md-12 title title-without-tabs">
+            {intl d='stockalert.bo.default' l='Configuration.'}
+        </div>
+
+        <div class="form-container">
+            <div class="col-md-12">
+
+                {form name="stockalert.configuration.form"}
+                <form method="POST" id="stockalert-form" action="{url path="/admin/module/stockalert/configuration"}"
+                    {form_enctype form=$form} class="clearfix">
+
+                    {form_hidden_fields form=$form}
+
+                    {render_form_field form=$form field="success_url" value={url path='/admin/module/StockAlert'}}
+
+                    {if {config key="check-available-stock"} != "1"}
+                    <p class="alert alert-info">
+                        {intl d='stockalert.bo.default' l='The stock is not not use on the site. Please set the config variable check-available-stock to 1.'}
+                    </p>
+                    {/if}
+
+                    {if $form_error}
+                        <div class="alert alert-danger">{$form_error_message}</div>
+                    {/if}
+
+                    {render_form_field form=$form field="enabled"}
+
+                    {render_form_field form=$form field="threshold"}
+
+                    {render_form_field form=$form field="emails"}
+
+                    <button type="submit" id="stockalert-save" name="stockalert_save" value="save" class="form-submit-button btn btn-sm btn-default" title="{intl d='stockalert.bo.default' l='Save'}">{intl d='stockalert.ai' l='Save'}</button>
+                </form>
+                {/form}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

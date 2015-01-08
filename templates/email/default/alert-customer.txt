@@ -1,0 +1,23 @@
+{default_translation_domain domain="stockalert.email.default"}
+
+{loop type="customer" name="customer.order" current="false" id="$customer_id" backend_context="1"}
+{intl l="Hi" },
+{/loop}
+
+{loop type="product" name="product" id=$product_id limit="1" lang=$locale}
+
+{$pse=[]}
+{loop name="pse" type="product_sale_elements" id=$pse_id}
+{loop name="combi" type="attribute_combination" product_sale_elements="$ID"}
+{$pse[]=$ATTRIBUTE_AVAILABILITY_TITLE}{*$ATTRIBUTE_TITLE*}
+{/loop}
+{/loop}
+{$pse={', '|implode:$pse}}
+{intl l="The product %title (%pse) is available again." title=$TITLE pse=$pse}
+
+{intl l="You can now order this product : %url" url=$URL}
+{/loop}
+
+{intl l="Feel free to contact us for any further information"}
+
+{intl l="Best Regards."}
