@@ -34,6 +34,10 @@ class StockAlertSubscribe extends BaseForm
                 'product_sale_elements_id',
                 [
                     'required'     => true,
+                    "label" => Translator::getInstance()->trans("Product", [], StockAlert::DOMAIN_MESSAGE),
+                    "label_attr" => [
+                        "for" => "product_sale_elements_id"
+                    ]
                 ]
             )
             ->add(

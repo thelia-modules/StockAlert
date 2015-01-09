@@ -12,8 +12,7 @@
 
 namespace StockAlert\Controller;
 
-
-use StockAlert\Event\StockAlert;
+use StockAlert\StockAlert;
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
 use Thelia\Controller\Front\BaseFrontController;
@@ -49,7 +48,11 @@ class StockAlertFrontOfficeController extends BaseFrontController
                 json_encode(
                     [
                         "success" => true,
-                        "message" => "ok"
+                        "message" => $this->getTranslator()->trans(
+                            "Your request has been taken into account",
+                            [],
+                            StockAlert::DOMAIN_MESSAGE
+                        )
                     ]
                 )
             );

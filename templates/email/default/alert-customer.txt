@@ -1,8 +1,6 @@
 {default_translation_domain domain="stockalert.email.default"}
 
-{loop type="customer" name="customer.order" current="false" id="$customer_id" backend_context="1"}
 {intl l="Hi" },
-{/loop}
 
 {loop type="product" name="product" id=$product_id limit="1" lang=$locale}
 

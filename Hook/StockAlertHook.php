@@ -25,6 +25,28 @@ use Thelia\Core\Hook\BaseHook;
 class StockAlertHook extends BaseHook
 {
 
+    public function onProductDetailsBottom(HookRenderEvent $event)
+    {
+        $config = SplitShipment::getConfig();
+
+        $event->add(
+            $this->render(
+                "product-details-bottom.html"
+            )
+        );
+    }
+
+    public function onProductJavascriptInitialization(HookRenderEvent $event)
+    {
+        $config = SplitShipment::getConfig();
+
+        $event->add(
+            $this->render(
+                "product.javascript-initialization.html"
+            )
+        );
+    }
+
     public function onModuleConfiguration(HookRenderEvent $event)
     {
         $moduleId = $this->getModule()->getModuleId();

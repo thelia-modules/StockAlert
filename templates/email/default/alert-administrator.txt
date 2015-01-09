@@ -1,27 +1,14 @@
 {default_translation_domain domain="stockalert.email.default"}
 
-{loop type="customer" name="customer.order" current="false" id="$customer_id" backend_context="1"}
 {intl l="Hi" },
-{/loop}
 
-{loop type="product" name="product" id=$product_id limit="1" lang=$locale}
+{intl l="Some product(s) is (are) going to be out of stock :"}
+{$products={','|implode:$products_id}}
+{loop type="product" name="product" id=$products visible="*" backend_context="yes" lang=$locale}
+{$ID}. {$TITLE} :
+    - url : {$URL}
+    - admin url : {url path='/admin/products/update' product_id=$ID}
 
-{$pse=[]}
-{loop name="pse" type="product_sale_elements" id=$pse_id}
-{$pse_ref=$REF}
-{$pse_quantity=$$QUANTITY}
-{loop name="combi" type="attribute_combination" product_sale_elements="$ID"}
-{$pse[]=$ATTRIBUTE_AVAILABILITY_TITLE}{*$ATTRIBUTE_TITLE*}
 {/loop}
-{/loop}
-{$pse={', '|implode:$pse}}
-{intl l="The product %title (%pse) is going to be out of stock." title=$TITLE pse=$pse}
-{intl l="Details :"}
-- product id : {$ID}
-- combination id : {$pse_id}
-- combination ref : {$pse_ref}
-- quantity in stock : {$pse_quantity}
-- url : {$URL}
-- admin url : {url path='/admin/products/update' product_id=$ID}
 
 {intl l="Best Regards."}

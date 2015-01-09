@@ -1,29 +1,15 @@
 {default_translation_domain domain="stockalert.email.default"}
 
-{loop type="customer" name="customer.order" current="false" id="$customer_id" backend_context="1"}
 <p>{intl l="Hi" },</p>
-{/loop}
 
-{loop type="product" name="product" id=$product_id limit="1" lang=$locale}
-
-{$pse=[]}
-{loop name="pse" type="product_sale_elements" id=$pse_id}
-{$pse_ref=$REF}
-{$pse_quantity=$$QUANTITY}
-{loop name="combi" type="attribute_combination" product_sale_elements="$ID"}
-{$pse[]=$ATTRIBUTE_AVAILABILITY_TITLE}{*$ATTRIBUTE_TITLE*}
-{/loop}
-{/loop}
-{$pse={', '|implode:$pse}}
-<p>{intl l="The product %title (%pse) is going to be out of stock." title=$TITLE pse=$pse}</p>
-<p>{intl l="Details :"}</p>
+<p>{intl l="Some product(s) is (are) going to be out of stock :"}</p>
+{$products={','|implode:$products_id}}
+{loop type="product" name="product" id=$products visible="*" backend_context="yes" lang=$locale}
+<p>{$ID}. {$TITLE} :</p>
 <ul>
-    <li>product id : {$ID}</li>
-    <li>combination id : {$pse_id}</li>
-    <li>combination ref : {$pse_ref}</li>
-    <li>quantity in stock : {$pse_quantity}</li>
     <li>url : <a href="{$URL}">{$URL}</a></li>
-    <li>admin url : <a hred="{url path='/admin/products/update' product_id=$ID}">{url path='/admin/products/update' product_id=$ID}</a></li>
+    <li>admin url : <a href="{url path='/admin/products/update' product_id=$ID}">{url path='/admin/products/update' product_id=$ID}</a></li>
 </ul>
+{/loop}
 
 <p>{intl l="Best Regards."}</p>

@@ -121,7 +121,7 @@ class StockAlert extends BaseModule
                 intval(ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD))
             ),
             'emails' => (
-                ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS)
+                explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS))
             )
         ];
 

@@ -39,7 +39,8 @@ class StockAlertBackOfficeController extends BaseAdminController
 
             ConfigQuery::write(StockAlert::CONFIG_ENABLED, $configForm['enabled']);
             ConfigQuery::write(StockAlert::CONFIG_THRESHOLD, $configForm['threshold']);
-            ConfigQuery::write(StockAlert::CONFIG_EMAILS, $configForm['emails']);
+            $emails = str_replace(' ', '', $configForm['emails']);
+            ConfigQuery::write(StockAlert::CONFIG_EMAILS, $emails);
 
             return $this->generateSuccessRedirect($form);
 
