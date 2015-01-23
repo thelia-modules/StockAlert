@@ -6,8 +6,9 @@
 {$products={','|implode:$products_id}}
 {loop type="product" name="product" id=$products visible="*" backend_context="yes" lang=$locale}
 {$ID}. {$TITLE} :
-    - url : {$URL}
-    - admin url : {url path='/admin/products/update' product_id=$ID}
+
+url : {$URL}
+admin url : {url path='/admin/products/update' product_id=$ID}
 
 {/loop}
 
