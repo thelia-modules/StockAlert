@@ -79,7 +79,7 @@ class StockAlertConfig extends BaseForm
                         ]),
                     ],
                     "required" => false,
-                    "data" => $config['emails'],
+                    "data" => implode(',', $config['emails']),
                     "label" => Translator::getInstance()->trans(
                         "Email Address",
                         [],
