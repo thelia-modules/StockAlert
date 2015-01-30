@@ -34,7 +34,7 @@ class StockAlertSubscribe extends BaseForm
                 'product_sale_elements_id',
                 [
                     'required'     => true,
-                    "label" => Translator::getInstance()->trans("Product", [], StockAlert::DOMAIN_MESSAGE),
+                    "label" => Translator::getInstance()->trans("Product", [], StockAlert::MESSAGE_DOMAIN),
                     "label_attr" => [
                         "for" => "product_sale_elements_id"
                     ]
@@ -48,7 +48,7 @@ class StockAlertSubscribe extends BaseForm
                         new NotBlank(),
                         new Email()
                     ],
-                    "label" => Translator::getInstance()->trans("Email Address", [], StockAlert::DOMAIN_MESSAGE),
+                    "label" => Translator::getInstance()->trans("Email Address", [], StockAlert::MESSAGE_DOMAIN),
                     "label_attr" => [
                         "for" => "email"
                     ]

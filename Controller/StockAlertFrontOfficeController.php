@@ -51,7 +51,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
                         "message" => $this->getTranslator()->trans(
                             "Your request has been taken into account",
                             [],
-                            StockAlert::DOMAIN_MESSAGE
+                            StockAlert::MESSAGE_DOMAIN
                         )
                     ]
                 )

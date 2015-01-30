@@ -102,7 +102,7 @@ class StockAlertManager implements EventSubscriberInterface
                 Translator::getInstance()->trans(
                     "You have already subscribed to this product",
                     [],
-                    StockAlert::DOMAIN_MESSAGE
+                    StockAlert::MESSAGE_DOMAIN
                 )
             );
 

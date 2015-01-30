@@ -29,7 +29,7 @@ use Thelia\Module\BaseModule;
  */
 class StockAlert extends BaseModule
 {
-    const DOMAIN_MESSAGE = "stockalert";
+    const MESSAGE_DOMAIN = "stockalert";
 
     const CONFIG_ENABLED = "stockalert_enabled";
     const CONFIG_THRESHOLD = "stockalert_threshold";
@@ -134,6 +134,6 @@ class StockAlert extends BaseModule
             $this->translator = Translator::getInstance();
         }
 
-        return $this->translator->trans($id, $parameters, StockAlert::DOMAIN_MESSAGE, $locale);
+        return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN, $locale);
     }
 }

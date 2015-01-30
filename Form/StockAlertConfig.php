@@ -41,7 +41,7 @@ class StockAlertConfig extends BaseForm
                 [
                     "required" => false,
                     "data" => $config['enabled'],
-                    "label" => Translator::getInstance()->trans("Enabled", [], StockAlert::DOMAIN_MESSAGE),
+                    "label" => Translator::getInstance()->trans("Enabled", [], StockAlert::MESSAGE_DOMAIN),
                     "label_attr" => [
                         "for" => "enabled"
                     ]
@@ -56,13 +56,13 @@ class StockAlertConfig extends BaseForm
                         new NotBlank(),
                     ],
                     "data" => $config['threshold'],
-                    "label" => Translator::getInstance()->trans("Threshold", [], StockAlert::DOMAIN_MESSAGE),
+                    "label" => Translator::getInstance()->trans("Threshold", [], StockAlert::MESSAGE_DOMAIN),
                     "label_attr" => [
                         "for" => "email",
                         "help" => Translator::getInstance()->trans(
                             "You will recieve a notification when the quantity in stock is lower or equal to this value.",
                             [],
-                            StockAlert::DOMAIN_MESSAGE
+                            StockAlert::MESSAGE_DOMAIN
                         ),
                     ]
                 ]
@@ -83,14 +83,14 @@ class StockAlertConfig extends BaseForm
                     "label" => Translator::getInstance()->trans(
                         "Email Address",
                         [],
-                        StockAlert::DOMAIN_MESSAGE
+                        StockAlert::MESSAGE_DOMAIN
                     ),
                     "label_attr" => [
                         "for" => "emails",
                         "help" => Translator::getInstance()->trans(
                             "A comma separated list of email that will recieve notifications",
                             [],
-                            StockAlert::DOMAIN_MESSAGE
+                            StockAlert::MESSAGE_DOMAIN
                         ),
                     ]
                 ]
@@ -133,7 +133,7 @@ class StockAlertConfig extends BaseForm
             $this->translator = Translator::getInstance();
         }
 
-        return $this->translator->trans($id, $parameters, StockAlert::DOMAIN_MESSAGE);
+        return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN);
     }
 
     /**
