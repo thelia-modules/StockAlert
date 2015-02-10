@@ -13,6 +13,7 @@
 namespace StockAlert\EventListeners;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use StockAlert\Event\ProductSaleElementAvailabilityEvent;
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
 use StockAlert\Model\RestockingAlert;
@@ -116,17 +117,33 @@ class StockAlertManager implements EventSubscriberInterface
     {
         if ($productSaleElementUpdateEvent->getQuantity() > 0) {
 
-            $subscribers = RestockingAlertQuery::create()
-                ->filterByProductSaleElementsId($productSaleElementUpdateEvent->getProductSaleElementId())
-                ->find();
+            // add extra checking
+            $pse = ProductSaleElementsQuery::create()->findPk(
+                $productSaleElementUpdateEvent->getProductSaleElementId()
+            );
+            $availabilityEvent = new ProductSaleElementAvailabilityEvent(
+                $pse
+            );
 
-            if (null !== $subscribers) {
-                foreach ($subscribers as $subscriber) {
-                    try {
-                        $this->sendEmail($subscriber);
-                        $subscriber->delete();
-                    } catch (\Exception $ex) {
-                        ;
+            $productSaleElementUpdateEvent->getDispatcher()->dispatch(
+                StockAlertEvents::STOCK_ALERT_CHECK_AVAILABILITY,
+                $availabilityEvent
+            );
+
+            if ($availabilityEvent->isAvailable()) {
+
+                $subscribers = RestockingAlertQuery::create()
+                    ->filterByProductSaleElementsId($productSaleElementUpdateEvent->getProductSaleElementId())
+                    ->find();
+
+                if (null !== $subscribers) {
+                    foreach ($subscribers as $subscriber) {
+                        try {
+                            $this->sendEmail($subscriber);
+                            $subscriber->delete();
+                        } catch (\Exception $ex) {
+                            ;
+                        }
                     }
                 }
             }

@@ -13,7 +13,7 @@
 
 namespace StockAlert\Hook;
 
-use SplitShipment\SplitShipment;
+use StockAlert\StockAlert;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 
@@ -27,8 +27,6 @@ class StockAlertHook extends BaseHook
 
     public function onProductDetailsBottom(HookRenderEvent $event)
     {
-        $config = SplitShipment::getConfig();
-
         $event->add(
             $this->render(
                 "product-details-bottom.html"
@@ -38,8 +36,6 @@ class StockAlertHook extends BaseHook
 
     public function onProductJavascriptInitialization(HookRenderEvent $event)
     {
-        $config = SplitShipment::getConfig();
-
         $event->add(
             $this->render(
                 "product.javascript-initialization.html"
@@ -50,18 +46,16 @@ class StockAlertHook extends BaseHook
     public function onModuleConfiguration(HookRenderEvent $event)
     {
         $moduleId = $this->getModule()->getModuleId();
-        $config = SplitShipment::getConfig();
+        $config = StockAlert::getConfig();
 
         $event->add(
             $this->render(
                 "configuration.html",
                 [
                     'module_id' => $moduleId,
-                    'method' => $config['method'],
                     'config' => $config
                 ]
             )
         );
     }
-
 }

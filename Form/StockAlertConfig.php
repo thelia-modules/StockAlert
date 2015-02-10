@@ -72,11 +72,13 @@ class StockAlertConfig extends BaseForm
                 "text",
                 [
                     "constraints" => [
-                        new Callback([
-                            "methods" => [
-                                [$this, "checkEmails"]
+                        new Callback(
+                            [
+                                "methods" => [
+                                    [$this, "checkEmails"]
+                                ]
                             ]
-                        ]),
+                        ),
                     ],
                     "required" => false,
                     "data" => implode(',', $config['emails']),

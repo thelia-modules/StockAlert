@@ -10,17 +10,45 @@
 /*      file that was distributed with this source code.                             */
 /*************************************************************************************/
 
+
 namespace StockAlert\Event;
 
+use Thelia\Core\Event\ProductSaleElement\ProductSaleElementEvent;
+use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
+use Thelia\Model\ProductSaleElements;
+
 /**
- * Class StockAlertEvents
- * @package RestockingAlert\Event
- * @author Baixas Alban <abaixas@openstudio.fr>
+ * Class ProductSaleElementAvailabilityEvent
+ * @package StockAlert\Event
  * @author Julien Chanséaume <jchanseaume@openstudio.fr>
- *
  */
-class StockAlertEvents
+class ProductSaleElementAvailabilityEvent extends ProductSaleElementEvent
 {
-    const STOCK_ALERT_SUBSCRIBE = "stockalert.subscribe";
-    const STOCK_ALERT_CHECK_AVAILABILITY = "stockalert.check.availability";
+
+    /** @var bool */
+    protected $available = true;
+
+
+    public function __construct(ProductSaleElements $product_sale_element = null)
+    {
+        $this->product_sale_element = $product_sale_element;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isAvailable()
+    {
+        return $this->available;
+    }
+
+    /**
+     * @param boolean $available
+     */
+    public function setAvailable($available)
+    {
+        $this->available = $available;
+
+        return $this;
+    }
 }
