@@ -1,0 +1,29 @@
+<div id="product-stock-alert" class="product-stock-alert hidden panel panel-default">
+    <div class="panel-body">
+        <p>
+            {intl l="This product is not available for now." d="stockalert.fo.default"}<br>
+            {intl l="Register your email to be notified when it will be available again." d="stockalert.fo.default"}
+        </p>
+        {form name="stockalert.subscribe.form"}
+            <form method="post" action="{url path='/module/stockalert/subscribe'}" {form_enctype form=$form} class="inline">
+
+                {form_hidden_fields form=$form}
+
+                {form_field form=$form field="product_sale_elements_id"}
+                <input id="stock-alert-id" type="hidden" name="{$name}" value="">
+                {/form_field}
+
+                <div id="product-stock-notify" class="alert hidden"></div>
+
+                <div class="form-group">
+                    {form_field form=$form field="email"}
+                       <label>{$label}</label>
+                       <input id="stock-alert-email" type="{$type}" name="{$name}" value="{$value}" class="form-control">
+                    {/form_field}
+                </div>
+
+                <input type="submit" class="btn btn-default" name="stock-alert-submit" value="{intl l="Notify me !" d="stockalert.fo.default"}" />
+            </form>
+        {/form}
+    </div>
+</div>

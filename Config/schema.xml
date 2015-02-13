@@ -1,0 +1,22 @@
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
+
+    <table name="restocking_alert" namespace="StockAlert\Model">
+
+        <column name="id" primaryKey="true" autoIncrement="true" required="true" type="INTEGER" />
+        <column name="product_sale_elements_id" required="true" type="INTEGER" />
+        <column name="email" size="255" type="VARCHAR" />
+        <column name="locale" size="45" type="VARCHAR" />
+
+        <foreign-key foreignTable="product_sale_elements" name="fk_restocking_alert_product_sale_elements_id" onDelete="CASCADE" >
+            <reference foreign="id" local="product_sale_elements_id" />
+        </foreign-key>
+
+        <behavior name="timestampable" />
+
+    </table>
+
+    <external-schema filename="local/config/schema.xml" referenceOnly="true" />
+
+</database>

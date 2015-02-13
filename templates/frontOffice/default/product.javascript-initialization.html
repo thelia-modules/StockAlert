@@ -1,0 +1,66 @@
+<script type="text/javascript">
+(function ($, undefined) {
+    $(document).ready(function () {
+
+        var $section = $('#product-stock-alert'),
+            $pseId = $('#pse-id'),
+            $alertPseId = $('#stock-alert-id'),
+            $pseSelector = $('select.pse-option'),
+            $cartSubmit = $('#pse-submit'),
+            $notify = $('#product-stock-notify')
+        ;
+
+        /* Check if add to cart is disabled or not */
+        var checkStock = function checkStock() {
+            if ($cartSubmit.prop("disabled")) {
+                $section.removeClass('hidden');
+            } else {
+                $section.addClass('hidden');
+            }
+        };
+
+        var saveStockAlert = function saveStockAlert($form) {
+
+            $alertPseId.val($pseId.val());
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: $form.attr('method'),
+                data: $form.serializeArray(),
+                dataType: 'json'
+            }).done(function(data, textStatus, jqXHR){
+                $notify.removeClass('hidden alert-success alert-warning');
+                if (data.success) {
+                    $notify
+                        .addClass('alert-success')
+                        .html(data.message)
+                    ;
+                    $('#stock-alert-email').val("");
+                } else {
+                    $notify
+                        .addClass('alert-warning')
+                        .html(data.message)
+                    ;
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown){
+                bootbox.alert(textStatus);
+            });
+
+        };
+
+        $pseSelector.on('change', function(ev) {
+            checkStock();
+        });
+
+        $section.on('submit', 'form', function(ev) {
+            event.preventDefault();
+
+            saveStockAlert($(this));
+        });
+
+        setTimeout(checkStock, 1000);
+
+    });
+})(jQuery);
+
+</script>
