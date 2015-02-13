@@ -20,7 +20,7 @@ use Thelia\Core\Hook\BaseHook;
 /**
  * Class StockAlertHook
  * @package StockAlert\Hook
- * @author Julien Chanséaume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertHook extends BaseHook
 {

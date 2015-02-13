@@ -37,7 +37,7 @@ use Thelia\Model\ProductSaleElementsQuery;
  * Class StockAlertManager
  * @package StockAlert\EventListeners
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien ChansÃ©aume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertManager implements EventSubscriberInterface
 {
@@ -84,8 +84,7 @@ class StockAlertManager implements EventSubscriberInterface
         $subscribe = RestockingAlertQuery::create()
             ->filterByEmail($email)
             ->filterByProductSaleElementsId($productSaleElementsId)
-            ->findOne()
-        ;
+            ->findOne();
 
         if (null === $subscribe) {
 
@@ -94,9 +93,7 @@ class StockAlertManager implements EventSubscriberInterface
                 ->setProductSaleElementsId($productSaleElementsId)
                 ->setEmail($email)
                 ->setLocale($event->getLocale())
-                ->save()
-            ;
-
+                ->save();
         } else {
 
             throw new \Exception(
@@ -106,7 +103,6 @@ class StockAlertManager implements EventSubscriberInterface
                     StockAlert::MESSAGE_DOMAIN
                 )
             );
-
         }
 
         $event->setRestockingAlert($subscribe);
@@ -213,8 +209,7 @@ class StockAlertManager implements EventSubscriberInterface
                 ->endUse()
                 ->select('Id')
                 ->find()
-                ->toArray()
-            ;
+                ->toArray();
 
             if (!empty($productIds)) {
                 $this->sendEmailForAdmin($config['emails'], $productIds);

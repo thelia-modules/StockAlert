@@ -15,7 +15,6 @@ namespace StockAlert\Controller;
 
 use StockAlert\StockAlert;
 use Thelia\Controller\Admin\BaseAdminController;
-use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
 
@@ -23,7 +22,7 @@ use Thelia\Model\ConfigQuery;
  * Class StockAlertBackOfficeController
  * @package StockAlert\Controller
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien ChansÃ©aume <jchanseaume@openstudio.fr>
+ * @author Julien ChansÃ©aume <julien@thelia.net>
  */
 class StockAlertBackOfficeController extends BaseAdminController
 {
@@ -43,7 +42,6 @@ class StockAlertBackOfficeController extends BaseAdminController
             ConfigQuery::write(StockAlert::CONFIG_EMAILS, $emails);
 
             return $this->generateSuccessRedirect($form);
-
         } catch (FormValidationException $e) {
             $errorMessage = $e->getMessage();
         } catch (\Exception $e) {
@@ -54,8 +52,7 @@ class StockAlertBackOfficeController extends BaseAdminController
 
         $this->getParserContext()
             ->addForm($form)
-            ->setGeneralError($errorMessage)
-        ;
+            ->setGeneralError($errorMessage);
 
         return $this->render(
             "module-configure",
@@ -63,6 +60,5 @@ class StockAlertBackOfficeController extends BaseAdminController
                 "module_code" => StockAlert::getModuleCode()
             ]
         );
-
     }
 }

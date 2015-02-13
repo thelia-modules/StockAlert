@@ -39,8 +39,19 @@ class StockAlert extends BaseModule
     const DEFAULT_THRESHOLD = "1";
     const DEFAULT_EMAILS = "";
 
-    /** @var Translator  */
+    /** @var Translator */
     protected $translator = null;
+
+    public static function getConfig()
+    {
+        $config = [
+            'enabled' => ("1" == ConfigQuery::read(self::CONFIG_ENABLED, self::DEFAULT_ENABLED)),
+            'threshold' => intval(ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD)),
+            'emails' => explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS))
+        ];
+
+        return $config;
+    }
 
     public function postActivation(ConnectionInterface $con = null)
     {
@@ -109,23 +120,6 @@ class StockAlert extends BaseModule
             $database = new Database($con);
             $database->insertSql(null, [__DIR__ . '/Config/thelia.sql']);
         }
-    }
-
-    public static function getConfig()
-    {
-        $config = [
-            'enabled' => (
-                "1" == ConfigQuery::read(self::CONFIG_ENABLED, self::DEFAULT_ENABLED)
-            ),
-            'threshold' => (
-                intval(ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD))
-            ),
-            'emails' => (
-                explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS))
-            )
-        ];
-
-        return $config;
     }
 
     protected function trans($id, array $parameters = [], $locale = null)

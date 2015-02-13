@@ -19,12 +19,12 @@ use Thelia\Core\Event\ActionEvent;
  * Class StockAlertEvent
  * @package StockAlert\Event
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien Chanséaume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertEvent extends ActionEvent
 {
 
-    /** @var  int  */
+    /** @var  int */
     private $productSaleElementsId;
 
     /** @var  string */
@@ -35,7 +35,6 @@ class StockAlertEvent extends ActionEvent
 
     /** @var  RestockingAlert */
     private $restockingAlert;
-
 
     /**
      * @param $productSaleElementsId
@@ -49,16 +48,6 @@ class StockAlertEvent extends ActionEvent
     }
 
     /**
-     * @param mixed $email
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-
-         return $this;
-    }
-
-    /**
      * @return mixed
      */
     public function getEmail()
@@ -67,11 +56,11 @@ class StockAlertEvent extends ActionEvent
     }
 
     /**
-     * @param mixed $productSaleElementsId
+     * @param mixed $email
      */
-    public function setProductSaleElementsId($productSaleElementsId)
+    public function setEmail($email)
     {
-        $this->productSaleElementsId = $productSaleElementsId;
+        $this->email = $email;
 
         return $this;
     }
@@ -82,6 +71,16 @@ class StockAlertEvent extends ActionEvent
     public function getProductSaleElementsId()
     {
         return $this->productSaleElementsId;
+    }
+
+    /**
+     * @param mixed $productSaleElementsId
+     */
+    public function setProductSaleElementsId($productSaleElementsId)
+    {
+        $this->productSaleElementsId = $productSaleElementsId;
+
+        return $this;
     }
 
     /**

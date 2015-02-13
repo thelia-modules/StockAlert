@@ -23,12 +23,59 @@ use Thelia\Form\BaseForm;
  * Class StockAlertConfig
  * @package StockAlert\Form
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien ChansÃ©aume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertConfig extends BaseForm
 {
     /** @var Translator $translator */
     protected $translator;
+
+    public function checkEmails($value, ExecutionContextInterface $context)
+    {
+        $data = $context->getRoot()->getData();
+
+        $value = trim($value);
+
+        if ("" === trim($value) && !empty($data["enabled"])) {
+            $context->addViolation(
+                $this->trans(
+                    "The Emails can not be empty",
+                    [
+                        "%id" => $value,
+                    ]
+                )
+            );
+        }
+
+        $emails = explode(',', $value);
+        foreach ($emails as $email) {
+            if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $context->addViolation(
+                    $this->trans(
+                        "'%email' is not a valid email address",
+                        ["%email" => $email]
+                    )
+                );
+            }
+        }
+    }
+
+    protected function trans($id, $parameters = [])
+    {
+        if (null === $this->translator) {
+            $this->translator = Translator::getInstance();
+        }
+
+        return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN);
+    }
+
+    /**
+     * @return string the name of you form. This name must be unique
+     */
+    public function getName()
+    {
+        return 'stockalert_config_form';
+    }
 
     protected function buildForm()
     {
@@ -97,52 +144,5 @@ class StockAlertConfig extends BaseForm
                     ]
                 ]
             );
-    }
-
-    public function checkEmails($value, ExecutionContextInterface $context)
-    {
-        $data = $context->getRoot()->getData();
-
-        $value = trim($value);
-
-        if ("" === trim($value) && !empty($data["enabled"])) {
-            $context->addViolation(
-                $this->trans(
-                    "The Emails can not be empty",
-                    [
-                        "%id" => $value,
-                    ]
-                )
-            );
-        }
-
-        $emails = explode(',', $value);
-        foreach ($emails as $email) {
-            if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $context->addViolation(
-                    $this->trans(
-                        "'%email' is not a valid email address",
-                        ["%email" => $email]
-                    )
-                );
-            }
-        }
-    }
-
-    protected function trans($id, $parameters = [])
-    {
-        if (null === $this->translator) {
-            $this->translator = Translator::getInstance();
-        }
-
-        return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN);
-    }
-
-    /**
-     * @return string the name of you form. This name must be unique
-     */
-    public function getName()
-    {
-        return 'stockalert_config_form';
     }
 }

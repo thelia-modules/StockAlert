@@ -16,7 +16,7 @@ namespace StockAlert\Event;
  * Class StockAlertEvents
  * @package RestockingAlert\Event
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien Chanséaume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  *
  */
 class StockAlertEvents

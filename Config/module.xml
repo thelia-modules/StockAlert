@@ -4,10 +4,10 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_1.xsd">
     <fullnamespace>StockAlert\StockAlert</fullnamespace>
     <descriptive locale="en_US">
-        <title>Stock Alert</title>
+        <title>Stock Alerts</title>
     </descriptive>
     <descriptive locale="fr_FR">
-        <title>Alert Stock</title>
+        <title>Alertes Stock</title>
     </descriptive>
     <languages>
         <language>en_US</language>
@@ -16,9 +16,9 @@
     <version>0.1</version>
     <author>
         <name>Julien Chanséaume</name>
-        <email>jchanseaume@openstudio.fr</email>
+        <email>julien@thelia.net</email>
     </author>
     <type>classic</type>
     <thelia>2.1.0</thelia>
-    <stability>beta</stability>
+    <stability>rc</stability>
 </module>

@@ -12,9 +12,9 @@
 
 namespace StockAlert\Controller;
 
-use StockAlert\StockAlert;
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
+use StockAlert\StockAlert;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Form\Exception\FormValidationException;
 
@@ -22,7 +22,7 @@ use Thelia\Form\Exception\FormValidationException;
  * Class RestockingAlertFrontOfficeController
  * @package StockAlert\Controller
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien ChansÃ©aume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertFrontOfficeController extends BaseFrontController
 {

@@ -14,13 +14,12 @@
 namespace StockAlert\Event;
 
 use Thelia\Core\Event\ProductSaleElement\ProductSaleElementEvent;
-use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
 use Thelia\Model\ProductSaleElements;
 
 /**
  * Class ProductSaleElementAvailabilityEvent
  * @package StockAlert\Event
- * @author Julien Chanséaume <jchanseaume@openstudio.fr>
+ * @author Julien Chanséaume <julien@thelia.net>
  */
 class ProductSaleElementAvailabilityEvent extends ProductSaleElementEvent
 {

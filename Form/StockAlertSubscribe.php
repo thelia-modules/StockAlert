@@ -22,7 +22,7 @@ use Thelia\Form\BaseForm;
  * Class RestockingAlertSubscribe
  * @package RestockingAlert\Form
  * @author Baixas Alban <abaixas@openstudio.fr>
- * @author Julien ChansÃ©aume <jchanseaume@openstudio.fr>
+ * @author Julien ChansÃ©aume <julien@thelia.net>
  */
 class StockAlertSubscribe extends BaseForm
 {
