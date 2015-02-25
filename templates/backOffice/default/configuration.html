@@ -70,19 +70,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                {loop type="restocking-alert" name="restocking-alert" limit=$limit page=$page}
+                    {loop type="restocking-alert" name="restocking-alert" limit=$limit page=$page}
                         <tr>
                             <td>{format_date date=$CREATE_DATE output="date"}</td>
                             <td>{$EMAIL}</td>
                             <td>
-                                {loop type="product_sale_elements" name="pse" id=$PRODUCT_SALE_ELEMENTS_ID}
-                                    {loop type="product" name="product" id=$PRODUCT_ID}
-                                        {$ID}. {$TITLE}
+                                {loop type="product_sale_elements" name="pse" id=$PRODUCT_SALE_ELEMENTS_ID limit="1"}
+                                    {loop type="product" name="product" id=$PRODUCT_ID limit="1"}
+                                        <a href="{url path='/admin/products/update' product_id=$ID}">{$ID}. {$TITLE}</a>
                                     {/loop}
                                 {/loop}
                             </td>
                         </tr>
-                {/loop}
+                    {/loop}
                     </tbody>
                     <tfoot>
                         <tr>
