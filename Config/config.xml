@@ -9,6 +9,10 @@
         <form name= "stockalert.configuration.form" class="StockAlert\Form\StockAlertConfig" />
     </forms>
 
+    <loops>
+        <loop name="restocking-alert" class="StockAlert\Loop\RestockingAlertLoop" />
+    </loops>
+
     <services>
         <service id="stockalert.alert.manager" class="StockAlert\EventListeners\StockAlertManager" scope="request">
             <argument type="service" id="thelia.parser" />
