@@ -7,6 +7,8 @@ This module has two different features :
   
 ## Installation
  
+### Manually
+
 This module requires Thelia in version 2.1
 
 It must be placed into your modules/ directory (local/modules/).
@@ -17,6 +19,14 @@ cd /path-to-thelia
 git submodule add https://github.com/thelia-modules/StockAlert.git local/modules/StockAlert
 
 Next, go to your Thelia admin panel for module activation.
+
+### Composer
+
+Add it in your main thelia composer.json file
+
+```
+composer require thelia/stock-alert-module:~1.0
+```
 
 ## configuration
 
