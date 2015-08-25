@@ -53,7 +53,7 @@
         });
 
         $section.on('submit', 'form', function(ev) {
-            event.preventDefault();
+            ev.preventDefault();
 
             saveStockAlert($(this));
         });
