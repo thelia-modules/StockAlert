@@ -25,7 +25,7 @@ use Thelia\Core\Hook\BaseHook;
 class StockAlertHook extends BaseHook
 {
 
-    public function onProductDetailsBottom(HookRenderEvent $event)
+    public function onProductBottom(HookRenderEvent $event)
     {
         $event->add(
             $this->render(
