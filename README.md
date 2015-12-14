@@ -28,7 +28,7 @@ Add it in your main thelia composer.json file
 composer require thelia/stock-alert-module:~1.0
 ```
 
-## configuration
+## Configuration
 
 You can activate or not the admin notifications on the configuration page of the module. You can also define 
 a threshold for product quantity and a list of emails.
@@ -42,3 +42,16 @@ have the same names.
 You can also customize emails sent by the module. You have to copy files from `templates/email/default/` 
 in your email template directory, edit them, and select this template in the **Mailing templates** configuration page.
 
+## Hooks
+
+This module adds a new hook:
+
+```
+product.stock-alert
+```
+
+You can place it anywhere in your template and use it instead of the ```product.details-bottom``` hook if you don't want to use it.
+
+It calls the same function as the ```product.details-bottom``` hook and renders the ```product-details-bottom.html`` template`
+
+**Important:** don't forget to disable the hook you don't want to use (```product.details-bottom``` for example).

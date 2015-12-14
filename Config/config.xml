@@ -23,7 +23,8 @@
 
     <hooks>
         <hook id="stockalert.hook" class="StockAlert\Hook\StockAlertHook" scope="request">
-            <tag name="hook.event_listener" event="product.details-bottom" type="front" />
+            <tag name="hook.event_listener" event="product.stock-alert" type="front" method="onProductDetailsBottom" />
+            <tag name="hook.event_listener" event="product.details-bottom" type="front" method="onProductDetailsBottom" />
             <tag name="hook.event_listener" event="product.javascript-initialization" type="front" />
             <tag name="hook.event_listener" event="module.configuration" type="back" />
         </hook>
