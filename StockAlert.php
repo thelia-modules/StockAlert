@@ -14,6 +14,7 @@ namespace StockAlert;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use StockAlert\Model\RestockingAlertQuery;
+use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Core\Translation\Translator;
 use Thelia\Install\Database;
 use Thelia\Model\ConfigQuery;
@@ -129,5 +130,20 @@ class StockAlert extends BaseModule
         }
 
         return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN, $locale);
+    }
+
+    public function getHooks()
+    {
+        return [
+            [
+                'code' => 'product.stock-alert',
+                'type' => TemplateDefinition::FRONT_OFFICE,
+                "title" => array(
+                    "fr_FR" => "Hook alertes stock",
+                    "en_US" => "Stock alert hook",
+                ),
+                "active" => true
+            ]
+        ];
     }
 }
