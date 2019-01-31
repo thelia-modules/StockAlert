@@ -36,7 +36,7 @@ class StockAlert extends BaseModule
     const CONFIG_THRESHOLD = "stockalert_threshold";
     const CONFIG_EMAILS = "stockalert_emails";
 
-    const DEFAULT_ENABLED = "0";
+    const DEFAULT_ENABLED = "1";
     const DEFAULT_THRESHOLD = "1";
     const DEFAULT_EMAILS = "";
 
@@ -54,65 +54,43 @@ class StockAlert extends BaseModule
         return $config;
     }
 
+    /**
+     * @param ConnectionInterface|null $con
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     public function postActivation(ConnectionInterface $con = null)
     {
-
-        $languages = LangQuery::create()->find();
-
         ConfigQuery::write(self::CONFIG_ENABLED, self::DEFAULT_ENABLED);
         ConfigQuery::write(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD);
-        ConfigQuery::write(self::CONFIG_EMAILS, self::DEFAULT_EMAILS);
+        ConfigQuery::write(self::CONFIG_EMAILS, ConfigQuery::read('store_notification_emails'));
 
         // create new message
         if (null === MessageQuery::create()->findOneByName('stockalert_customer')) {
-
-            $message = new Message();
-            $message
+            (new Message())
                 ->setName('stockalert_customer')
                 ->setHtmlTemplateFileName('alert-customer.html')
-                ->setHtmlLayoutFileName('')
                 ->setTextTemplateFileName('alert-customer.txt')
-                ->setTextLayoutFileName('')
-                ->setSecured(0);
+                ->setSecured(0)
+                ->setLocale('en_US')
+                ->setTitle('Stock Alert - Customer')
+                ->setSubject('Product {$product_title} is available again')
+                ->setLocale('fr_FR')
+                ->setTitle('Alerte Stock - Client')
+                ->setSubject('Le produit {$product_title} est à nouveau disponible')
+                ->save();
 
-            foreach ($languages as $language) {
-                $locale = $language->getLocale();
-
-                $message->setLocale($locale);
-
-                $message->setTitle(
-                    $this->trans('Stock Alert - Customer', [], $locale)
-                );
-                $message->setSubject(
-                    $this->trans('Product {$product_title} is available again', [], $locale)
-                );
-            }
-
-            $message->save();
-
-            $message = new Message();
-            $message
+            (new Message())
                 ->setName('stockalert_administrator')
                 ->setHtmlTemplateFileName('alert-administrator.html')
-                ->setHtmlLayoutFileName('')
                 ->setTextTemplateFileName('alert-administrator.txt')
-                ->setTextLayoutFileName('')
-                ->setSecured(0);
-
-            foreach ($languages as $language) {
-                $locale = $language->getLocale();
-
-                $message->setLocale($locale);
-
-                $message->setTitle(
-                    $this->trans('Stock Alert - Administrator', [], $locale)
-                );
-                $message->setSubject(
-                    $this->trans('Product {$product_title} is (nearly) out of stock', [], $locale)
-                );
-            }
-
-            $message->save();
+                ->setSecured(0)
+                ->setLocale('en_US')
+                ->setTitle('Stock Alert - Administrator')
+                ->setSubject('List of products nearly out of stock')
+                ->setLocale('fr_FR')
+                ->setTitle('Alerte Stock - Administrateur')
+                ->setSubject('Liste des produits qui seront bientôt en rupture de stock')
+                ->save();
         }
 
         try {
@@ -121,6 +99,29 @@ class StockAlert extends BaseModule
             $database = new Database($con);
             $database->insertSql(null, [__DIR__ . '/Config/thelia.sql']);
         }
+    }
+
+    /**
+     * @param ConnectionInterface|null $con
+     * @param bool $deleteModuleData
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false)
+    {
+        if (null !== $msg = MessageQuery::create()->findOneByName('stockalert_customer')) {
+            $msg->delete();
+        }
+        if (null !== $msg = MessageQuery::create()->findOneByName('stockalert_administrator')) {
+            $msg->delete();
+        }
+
+        ConfigQuery::create()
+            ->filterByName([ self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS ])
+            ->delete()
+        ;
+
+        $database = new Database($con);
+        $database->insertSql(null, [__DIR__ . '/Config/destroy.sql']);
     }
 
     protected function trans($id, array $parameters = [], $locale = null)

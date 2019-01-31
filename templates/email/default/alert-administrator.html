@@ -5,7 +5,7 @@
 <p>{intl l="Some product(s) is (are) going to be out of stock :"}</p>
 {$products={','|implode:$products_id}}
 {loop type="product" name="product" id=$products visible="*" backend_context="yes" lang=$locale}
-<p>{$ID}. {$TITLE} :</p>
+<p>{$ID}: {$REF} - {$TITLE} :</p>
 <ul>
     <li>url : <a href="{$URL}">{$URL}</a></li>
     <li>admin url : <a href="{url path='/admin/products/update' product_id=$ID}">{url path='/admin/products/update' product_id=$ID}</a></li>

@@ -3,17 +3,17 @@
 <p>{intl l="Hi" },</p>
 
 {loop type="product" name="product" id=$product_id limit="1" lang=$locale}
+    {$pse=[]}
+    {loop name="pse" type="product_sale_elements" id=$pse_id|default:0}
+        {loop name="combi" type="attribute_combination" product_sale_elements="$ID"}
+            {$pse[]=$ATTRIBUTE_AVAILABILITY_TITLE}{*$ATTRIBUTE_TITLE*}
+        {/loop}
+    {/loop}
 
-{$pse=[]}
-{loop name="pse" type="product_sale_elements" id=$pse_id}
-{loop name="combi" type="attribute_combination" product_sale_elements="$ID"}
-{$pse[]=$ATTRIBUTE_AVAILABILITY_TITLE}{*$ATTRIBUTE_TITLE*}
-{/loop}
-{/loop}
-{$pse={', '|implode:$pse}}
-<p>{intl l="The product %title (%pse) is available again." title=$TITLE pse=$pse}</p>
+    {$pse={', '|implode:$pse}}
+    <p>{intl l="The product %title (%pse) is now available." title=$TITLE pse=$pse}</p>
 
-<p>{intl l="You can now order this product : %url" url=$URL}</p>
+    <p>{intl l='You can now <a href="%url">order this product here</a>.' url=$URL}</p>
 {/loop}
 
 <p>{intl l="Feel free to contact us for any further information"}</p>

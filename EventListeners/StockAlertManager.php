@@ -23,13 +23,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\Template\ParserInterface;
 use Thelia\Core\Translation\Translator;
 use Thelia\Log\Tlog;
 use Thelia\Mailer\MailerFactory;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Lang;
-use Thelia\Model\MessageQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 
@@ -41,14 +39,10 @@ use Thelia\Model\ProductSaleElementsQuery;
  */
 class StockAlertManager implements EventSubscriberInterface
 {
-
-    protected $parser;
-
     protected $mailer;
 
-    public function __construct(ParserInterface $parser, MailerFactory $mailer)
+    public function __construct(MailerFactory $mailer)
     {
-        $this->parser = $parser;
         $this->mailer = $mailer;
     }
 
@@ -87,7 +81,6 @@ class StockAlertManager implements EventSubscriberInterface
             ->findOne();
 
         if (null === $subscribe) {
-
             $subscribe = new RestockingAlert();
             $subscribe
                 ->setProductSaleElementsId($productSaleElementsId)
@@ -95,7 +88,6 @@ class StockAlertManager implements EventSubscriberInterface
                 ->setLocale($event->getLocale())
                 ->save();
         } else {
-
             throw new \Exception(
                 Translator::getInstance()->trans(
                     "You have already subscribed to this product",
@@ -112,7 +104,6 @@ class StockAlertManager implements EventSubscriberInterface
     public function checkStock(ProductSaleElementUpdateEvent $productSaleElementUpdateEvent)
     {
         if ($productSaleElementUpdateEvent->getQuantity() > 0) {
-
             // add extra checking
             $pse = ProductSaleElementsQuery::create()->findPk(
                 $productSaleElementUpdateEvent->getProductSaleElementId()
@@ -127,7 +118,6 @@ class StockAlertManager implements EventSubscriberInterface
             );
 
             if ($availabilityEvent->isAvailable()) {
-
                 $subscribers = RestockingAlertQuery::create()
                     ->filterByProductSaleElementsId($productSaleElementUpdateEvent->getProductSaleElementId())
                     ->find();
@@ -146,42 +136,35 @@ class StockAlertManager implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @param RestockingAlert $subscriber
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     public function sendEmail(RestockingAlert $subscriber)
     {
         $contactEmail = ConfigQuery::read('store_email');
 
         if ($contactEmail) {
-
-            $message = MessageQuery::create()
-                ->filterByName('stockalert_customer')
-                ->findOne();
-
-            if (null === $message) {
-                throw new \Exception("Failed to load message 'stockalert_customer'.");
-            }
-
             $pse = ProductSaleElementsQuery::create()->findPk($subscriber->getProductSaleElementsId());
 
-            $this->parser->assign('locale', $subscriber->getLocale());
-            $this->parser->assign('pse_id', $pse->getId());
-            $this->parser->assign('product_id', $pse->getProductId());
-
-            $message
-                ->setLocale($subscriber->getLocale());
-
-            $instance = \Swift_Message::newInstance()
-                ->addTo($subscriber->getEmail(), ConfigQuery::read('store_name'))
-                ->addFrom($contactEmail, ConfigQuery::read('store_name'));
-
-            // Build subject and body
-            $message->buildMessage($this->parser, $instance);
-
-            $this->mailer->send($instance);
+            $this->mailer->sendEmailMessage(
+                'stockalert_customer',
+                [ $contactEmail => ConfigQuery::read('store_name') ],
+                [ $subscriber->getEmail() => ConfigQuery::read('store_name') ],
+                [
+                    'locale' => $subscriber->getLocale(),
+                    'pse_id' => $pse->getId(),
+                    'product_id' => $pse->getProductId(),
+                    'product_title' => $pse->getProduct()->setLocale($subscriber->getLocale())->getTitle()
+                ],
+                $subscriber->getLocale()
+            );
 
             Tlog::getInstance()->debug("Restocking Alert sent to customer " . $subscriber->getEmail());
         } else {
-            Tlog::getInstance()->debug("Restocking Alert message no contact email Restocking Alert id",
-                $subscriber->getId());
+            Tlog::getInstance()->debug(
+                "Restocking Alert: no contact email is defined !"
+            );
         }
     }
 
@@ -219,40 +202,33 @@ class StockAlertManager implements EventSubscriberInterface
 
     public function sendEmailForAdmin($emails, $productIds)
     {
+        $locale = Lang::getDefaultLanguage()->getLocale();
+
         $contactEmail = ConfigQuery::read('store_email');
 
         if ($contactEmail) {
+            $storeName = ConfigQuery::read('store_name');
 
-            $message = MessageQuery::create()
-                ->filterByName('stockalert_administrator')
-                ->findOne();
+            $to = [];
 
-            if (null === $message) {
-                throw new \Exception("Failed to load message 'stockalert_administrator'.");
+            foreach ($emails as $recipient) {
+                $to[$recipient] = $storeName;
             }
 
-            $locale = Lang::getDefaultLanguage()->getLocale();
-
-            $this->parser->assign('locale', $locale);
-            $this->parser->assign('products_id', $productIds);
-
-            $message->setLocale($locale);
-
-            $instance = \Swift_Message::newInstance();
-            $instance->addFrom($contactEmail, ConfigQuery::read('store_name'));
-
-            foreach ($emails as $email) {
-                $instance->addTo($email);
-            }
-
-            // Build subject and body
-            $message->buildMessage($this->parser, $instance);
-
-            $this->mailer->send($instance);
+            $this->mailer->sendEmailMessage(
+                'stockalert_administrator',
+                [ $contactEmail => $storeName ],
+                $to,
+                [
+                    'locale' => $locale,
+                    'products_id' => $productIds
+                ],
+                $locale
+            );
 
             Tlog::getInstance()->debug("Stock Alert sent to administrator " . implode(', ', $emails));
         } else {
-            Tlog::getInstance()->debug("Stock Alert sent to administrator " . implode(', ', $emails));
+            Tlog::getInstance()->debug("Restocking Alert: no contact email is defined !");
         }
     }
 }
