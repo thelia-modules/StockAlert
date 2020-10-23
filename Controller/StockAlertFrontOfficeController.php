@@ -17,6 +17,7 @@ use StockAlert\Event\StockAlertEvents;
 use StockAlert\StockAlert;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Form\Exception\FormValidationException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class RestockingAlertFrontOfficeController
@@ -29,7 +30,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
 
     public function subscribe()
     {
-        $errorMessage = null;
+        $success = true;
 
         $form = $this->createForm('stockalert.subscribe.form', 'form');
 
@@ -44,29 +45,29 @@ class StockAlertFrontOfficeController extends BaseFrontController
 
             $this->dispatch(StockAlertEvents::STOCK_ALERT_SUBSCRIBE, $subscriberEvent);
 
-            return $this->jsonResponse(
-                json_encode(
-                    [
-                        "success" => true,
-                        "message" => $this->getTranslator()->trans(
-                            "Your request has been taken into account",
-                            [],
-                            StockAlert::MESSAGE_DOMAIN
-                        )
-                    ]
-                )
+            $message = $this->getTranslator()->trans(
+                "C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.",
+                [],
+                StockAlert::MESSAGE_DOMAIN
             );
-        } catch (FormValidationException $e) {
-            $errorMessage = $e->getMessage();
         } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
+            $success = false;
+            $message = $e->getMessage();
+        }
+
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            if (!$success) {
+                $this->getSession()->getFlashBag()->set('flashMessage', $message);
+            }
+
+            return RedirectResponse::create($this->getRequest()->get('stockalert_subscribe_form')['success_url']);
         }
 
         return $this->jsonResponse(
             json_encode(
                 [
-                    "success" => false,
-                    "message" => $errorMessage
+                    "success" => $success,
+                    "message" => $message
                 ]
             )
         );

@@ -87,14 +87,6 @@ class StockAlertManager implements EventSubscriberInterface
                 ->setEmail($email)
                 ->setLocale($event->getLocale())
                 ->save();
-        } else {
-            throw new \Exception(
-                Translator::getInstance()->trans(
-                    "You have already subscribed to this product",
-                    [],
-                    StockAlert::MESSAGE_DOMAIN
-                )
-            );
         }
 
         $event->setRestockingAlert($subscribe);
