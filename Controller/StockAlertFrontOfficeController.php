@@ -56,10 +56,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
         }
 
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            if (!$success) {
-                $this->getSession()->getFlashBag()->set('flashMessage', $message);
-            }
-
+            $this->getSession()->getFlashBag()->set('flashMessage', $message);
             return RedirectResponse::create($this->getRequest()->get('stockalert_subscribe_form')['success_url']);
         }
 
