@@ -13,12 +13,16 @@
 namespace StockAlert\Controller;
 
 
+use StockAlert\Form\StockAlertConfig;
 use StockAlert\StockAlert;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
+ * @Route("/admin/module/stockalert", name="stockalert_back")
  * Class StockAlertBackOfficeController
  * @package StockAlert\Controller
  * @author Baixas Alban <abaixas@openstudio.fr>
@@ -27,11 +31,14 @@ use Thelia\Model\ConfigQuery;
 class StockAlertBackOfficeController extends BaseAdminController
 {
 
-    public function configuration()
+    /**
+     * @Route("/configuration", name="_configuration", methods="POST")
+     */
+    public function configuration(ParserContext $parserContext)
     {
         $errorMessage = null;
 
-        $form = $this->createForm('stockalert.configuration.form', 'form');
+        $form = $this->createForm(StockAlertConfig::getName());
 
         try {
             $configForm = $this->validateForm($form)->getData();
@@ -50,7 +57,7 @@ class StockAlertBackOfficeController extends BaseAdminController
 
         $form->setErrorMessage($errorMessage);
 
-        $this->getParserContext()
+        $parserContext
             ->addForm($form)
             ->setGeneralError($errorMessage);
 

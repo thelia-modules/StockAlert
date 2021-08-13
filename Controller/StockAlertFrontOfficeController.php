@@ -14,12 +14,19 @@ namespace StockAlert\Controller;
 
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
+use StockAlert\Form\StockAlertSubscribe;
 use StockAlert\StockAlert;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Controller\Front\BaseFrontController;
+use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
+ * @Route("/module/stockalert", name="stockalert_front")
  * Class RestockingAlertFrontOfficeController
  * @package StockAlert\Controller
  * @author Baixas Alban <abaixas@openstudio.fr>
@@ -28,11 +35,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class StockAlertFrontOfficeController extends BaseFrontController
 {
 
-    public function subscribe()
+    /**
+     * @Route("/subscribe", name="_subscribe", methods="POST")
+     */
+    public function subscribe(EventDispatcherInterface $eventDispatcher, RequestStack $requestStack)
     {
         $success = true;
 
-        $form = $this->createForm('stockalert.subscribe.form', 'form', [], ['csrf_protection'   => false]);
+        $form = $this->createForm(StockAlertSubscribe::getName(), FormType::class, [], ['csrf_protection'   => false]);
 
         try {
             $subscribeForm = $this->validateForm($form)->getData();
@@ -41,12 +51,12 @@ class StockAlertFrontOfficeController extends BaseFrontController
                 $subscribeForm['product_sale_elements_id'],
                 $subscribeForm['email'],
                 $subscribeForm['newsletter'],
-                $this->getRequest()->getSession()->getLang()->getLocale()
+                $requestStack->getCurrentRequest()->getSession()->getLang()->getLocale()
             );
 
-            $this->dispatch(StockAlertEvents::STOCK_ALERT_SUBSCRIBE, $subscriberEvent);
+            $eventDispatcher->dispatch($subscriberEvent, StockAlertEvents::STOCK_ALERT_SUBSCRIBE);
 
-            $message = $this->getTranslator()->trans(
+            $message = Translator::getInstance()->trans(
                 "C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.",
                 [],
                 StockAlert::MESSAGE_DOMAIN
@@ -56,9 +66,9 @@ class StockAlertFrontOfficeController extends BaseFrontController
             $message = $e->getMessage();
         }
 
-        if (!$this->getRequest()->isXmlHttpRequest()) {
-            $this->getSession()->getFlashBag()->set('flashMessage', $message);
-            return RedirectResponse::create($this->getRequest()->get('stockalert_subscribe_form')['success_url']);
+        if (!$requestStack->getCurrentRequest()->isXmlHttpRequest()) {
+            $requestStack->getCurrentRequest()->getSession()->getFlashBag()->set('flashMessage', $message);
+            return RedirectResponse::create($requestStack->getCurrentRequest()->get('stockalert_subscribe_form')['success_url']);
         }
 
         return $this->jsonResponse(

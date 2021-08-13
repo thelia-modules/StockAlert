@@ -27,12 +27,6 @@ class ProductSaleElementAvailabilityEvent extends ProductSaleElementEvent
     /** @var bool */
     protected $available = true;
 
-
-    public function __construct(ProductSaleElements $product_sale_element = null)
-    {
-        $this->product_sale_element = $product_sale_element;
-    }
-
     /**
      * @return boolean
      */

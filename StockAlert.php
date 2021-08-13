@@ -14,6 +14,7 @@ namespace StockAlert;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use StockAlert\Model\RestockingAlertQuery;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Core\Translation\Translator;
 use Thelia\Install\Database;
@@ -58,7 +59,7 @@ class StockAlert extends BaseModule
      * @param ConnectionInterface|null $con
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(ConnectionInterface $con = null): void
     {
         ConfigQuery::write(self::CONFIG_ENABLED, self::DEFAULT_ENABLED);
         ConfigQuery::write(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD);
@@ -106,7 +107,7 @@ class StockAlert extends BaseModule
      * @param bool $deleteModuleData
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false)
+    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
     {
         if (null !== $msg = MessageQuery::create()->findOneByName('stockalert_customer')) {
             $msg->delete();
@@ -146,5 +147,13 @@ class StockAlert extends BaseModule
                 "active" => true
             ]
         ];
+    }
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }

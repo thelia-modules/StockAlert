@@ -13,8 +13,11 @@
 namespace StockAlert\Form;
 
 use StockAlert\StockAlert;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Thelia\Core\Form\Type\Field\ProductSaleElementsIdType;
+use Thelia\Core\Form\Type\ProductSaleElementsType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 
@@ -31,7 +34,7 @@ class StockAlertSubscribe extends BaseForm
         $this->formBuilder
             ->add(
                 'product_sale_elements_id',
-                'product_sale_elements_id',
+                ProductSaleElementsIdType::class,
                 [
                     'required'     => true,
                     "label" => Translator::getInstance()->trans("Product", [], StockAlert::MESSAGE_DOMAIN),
@@ -42,7 +45,7 @@ class StockAlertSubscribe extends BaseForm
             )
             ->add(
                 "email",
-                "email",
+                EmailType::class,
                 [
                     "constraints" => [
                         new NotBlank(),
@@ -67,7 +70,7 @@ class StockAlertSubscribe extends BaseForm
     /**
      * @return string the name of you form. This name must be unique
      */
-    public function getName()
+    public static function getName()
     {
         return 'stockalert_subscribe_form';
     }
