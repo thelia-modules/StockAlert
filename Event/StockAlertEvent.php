@@ -36,15 +36,19 @@ class StockAlertEvent extends ActionEvent
     /** @var  RestockingAlert */
     private $restockingAlert;
 
+    /** @var boolean */
+    private $subscribeToNewsLetter;
+
     /**
      * @param $productSaleElementsId
      * @param $email
      */
-    public function __construct($productSaleElementsId, $email, $locale)
+    public function __construct($productSaleElementsId, $email, $subscribeToNewsLetter, $locale)
     {
         $this->setEmail($email);
         $this->setProductSaleElementsId($productSaleElementsId);
         $this->setLocale($locale);
+        $this->setSubscribeToNewsLetter($subscribeToNewsLetter);
     }
 
     /**
@@ -117,5 +121,21 @@ class StockAlertEvent extends ActionEvent
         $this->locale = $locale;
 
         return $this;
+    }
+
+    /**
+     * @param boolean $subscribeToNewsLetter
+     */
+    public function setSubscribeToNewsLetter($subscribeToNewsLetter)
+    {
+        $this->subscribeToNewsLetter = $subscribeToNewsLetter;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getSubscribeToNewsLetter()
+    {
+        return $this->subscribeToNewsLetter;
     }
 }

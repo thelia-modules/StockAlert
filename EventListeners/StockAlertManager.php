@@ -20,6 +20,7 @@ use StockAlert\Model\RestockingAlert;
 use StockAlert\Model\RestockingAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Thelia\Core\Event\Newsletter\NewsletterEvent;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -28,6 +29,7 @@ use Thelia\Log\Tlog;
 use Thelia\Mailer\MailerFactory;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Lang;
+use Thelia\Model\NewsletterQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 
@@ -65,6 +67,8 @@ class StockAlertManager implements EventSubscriberInterface
     {
         $productSaleElementsId = $event->getProductSaleElementsId();
         $email = $event->getEmail();
+        $subscribeToNewsLetter = $event->getSubscribeToNewsLetter();
+
 
         if (!isset($productSaleElementsId)) {
             throw new \Exception("missing param");
@@ -89,7 +93,24 @@ class StockAlertManager implements EventSubscriberInterface
                 ->save();
         }
 
+        if ($subscribeToNewsLetter) {
+            $this->subscribeNewsletter($email,$event);
+        }
+
+
         $event->setRestockingAlert($subscribe);
+    }
+
+    protected function subscribeNewsletter($email, StockAlertEvent $event)
+    {
+        $customer = NewsletterQuery::create()->findOneByEmail($email);
+
+        if (!$customer) {
+
+            $newsletter = new NewsletterEvent($email,"fr_FR");
+            $event->getDispatcher()->dispatch(TheliaEvents::NEWSLETTER_SUBSCRIBE, $newsletter);
+
+        }
     }
 
 

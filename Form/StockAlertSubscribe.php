@@ -53,7 +53,15 @@ class StockAlertSubscribe extends BaseForm
                         "for" => "email"
                     ]
                 ]
-            );
+            )
+            // Add Newsletter checkbox
+            ->add("newsletter", "checkbox", array(
+                "label" => Translator::getInstance()->trans('I would like to receive the newsletter or the latest news.'),
+                "label_attr" => array(
+                    "for" => "newsletter",
+                ),
+                "required" => false,
+            ));
     }
 
     /**

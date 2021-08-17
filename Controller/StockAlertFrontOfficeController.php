@@ -40,6 +40,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
             $subscriberEvent = new StockAlertEvent(
                 $subscribeForm['product_sale_elements_id'],
                 $subscribeForm['email'],
+                $subscribeForm['newsletter'],
                 $this->getRequest()->getSession()->getLang()->getLocale()
             );
 
