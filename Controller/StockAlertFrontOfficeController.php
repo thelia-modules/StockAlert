@@ -32,7 +32,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
     {
         $success = true;
 
-        $form = $this->createForm('stockalert.subscribe.form', 'form');
+        $form = $this->createForm('stockalert.subscribe.form', 'form', [], ['csrf_protection'   => false]);
 
         try {
             $subscribeForm = $this->validateForm($form)->getData();
