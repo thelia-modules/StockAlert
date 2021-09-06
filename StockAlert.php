@@ -94,11 +94,10 @@ class StockAlert extends BaseModule
                 ->save();
         }
 
-        try {
-            RestockingAlertQuery::create()->findOne();
-        } catch (\Exception $e) {
+        if (!self::getConfigValue('is_initialized', false)){
             $database = new Database($con);
-            $database->insertSql(null, [__DIR__ . '/Config/thelia.sql']);
+            $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
+            self::setConfigValue('is_initialized', true);
         }
     }
 
