@@ -20,6 +20,7 @@ use StockAlert\Model\RestockingAlert;
 use StockAlert\Model\RestockingAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Newsletter\NewsletterEvent;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
@@ -43,9 +44,12 @@ class StockAlertManager implements EventSubscriberInterface
 {
     protected $mailer;
 
-    public function __construct(MailerFactory $mailer)
+    protected $dispatcher;
+
+    public function __construct(MailerFactory $mailer, EventDispatcherInterface $dispatcher)
     {
         $this->mailer = $mailer;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -108,7 +112,7 @@ class StockAlertManager implements EventSubscriberInterface
         if (!$customer) {
 
             $newsletter = new NewsletterEvent($email,"fr_FR");
-            $event->getDispatcher()->dispatch(TheliaEvents::NEWSLETTER_SUBSCRIBE, $newsletter);
+            $this->dispatcher->dispatch($newsletter, TheliaEvents::NEWSLETTER_SUBSCRIBE);
 
         }
     }
@@ -125,9 +129,9 @@ class StockAlertManager implements EventSubscriberInterface
                 $pse
             );
 
-            $productSaleElementUpdateEvent->getDispatcher()->dispatch(
-                StockAlertEvents::STOCK_ALERT_CHECK_AVAILABILITY,
-                $availabilityEvent
+            $this->dispatcher->dispatch(
+                $availabilityEvent,
+                StockAlertEvents::STOCK_ALERT_CHECK_AVAILABILITY
             );
 
             if ($availabilityEvent->isAvailable()) {

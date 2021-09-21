@@ -13,9 +13,12 @@
 namespace StockAlert\Form;
 
 use StockAlert\StockAlert;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\ExecutionContextInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 
@@ -72,7 +75,7 @@ class StockAlertConfig extends BaseForm
     /**
      * @return string the name of you form. This name must be unique
      */
-    public function getName()
+    public static function getName()
     {
         return 'stockalert_config_form';
     }
@@ -84,7 +87,7 @@ class StockAlertConfig extends BaseForm
         $this->formBuilder
             ->add(
                 'enabled',
-                'checkbox',
+                CheckboxType::class,
                 [
                     "required" => false,
                     "data" => $config['enabled'],
@@ -96,7 +99,7 @@ class StockAlertConfig extends BaseForm
             )
             ->add(
                 'threshold',
-                'integer',
+                IntegerType::class,
                 [
                     "required" => true,
                     "constraints" => [
@@ -116,15 +119,11 @@ class StockAlertConfig extends BaseForm
             )
             ->add(
                 "emails",
-                "text",
+                TextType::class,
                 [
                     "constraints" => [
                         new Callback(
-                            [
-                                "methods" => [
-                                    [$this, "checkEmails"]
-                                ]
-                            ]
+                            [$this, "checkEmails"]
                         ),
                     ],
                     "required" => false,
