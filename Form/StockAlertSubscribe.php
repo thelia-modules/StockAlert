@@ -13,6 +13,7 @@
 namespace StockAlert\Form;
 
 use StockAlert\StockAlert;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -58,7 +59,7 @@ class StockAlertSubscribe extends BaseForm
                 ]
             )
             // Add Newsletter checkbox
-            ->add("newsletter", "checkbox", array(
+            ->add("newsletter", CheckboxType::class, array(
                 "label" => Translator::getInstance()->trans('I would like to receive the newsletter or the latest news.'),
                 "label_attr" => array(
                     "for" => "newsletter",
