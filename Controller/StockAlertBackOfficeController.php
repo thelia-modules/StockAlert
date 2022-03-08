@@ -13,10 +13,14 @@
 namespace StockAlert\Controller;
 
 
+use StockAlert\Model\RestockingAlert;
+use StockAlert\Model\RestockingAlertQuery;
 use StockAlert\StockAlert;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
+use Thelia\Tools\URL;
 
 /**
  * Class StockAlertBackOfficeController
@@ -60,5 +64,15 @@ class StockAlertBackOfficeController extends BaseAdminController
                 "module_code" => StockAlert::getModuleCode()
             ]
         );
+    }
+
+    public function deleteEmail()
+    {
+        $restockingAlertId = $this->getRequest()->get("id");
+        if ($restockingAlertId) {
+            $restockingAlert = RestockingAlertQuery::create()->filterById($restockingAlertId)->findOne();
+            $restockingAlert->delete();
+        }
+        return new RedirectResponse(URL::getInstance()->absoluteUrl($this->getSession()->getReturnToUrl()));
     }
 }

@@ -12,4 +12,7 @@
         <default key="_controller">StockAlert\Controller\StockAlertBackOfficeController::configuration</default>
     </route>
 
+    <route id="stockalert.back.delete.email" path="/admin/module/stockalert/delete" methods="get">
+        <default key="_controller">StockAlert\Controller\StockAlertBackOfficeController::deleteEmail</default>
+    </route>
 </routes>

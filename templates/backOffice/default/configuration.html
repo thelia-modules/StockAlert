@@ -50,7 +50,7 @@
         <div class="col-md-12 title title-without-tabs">
             {intl d='stockalert.bo.default' l='List of current subscriptions.'}
         </div>
-        {$limit={$smarty.get.limit|default:100}}
+        {$limit={$smarty.get.limit|default:10}}
         {$page={$smarty.get.page|default:1}}
 
         {if {count type="restocking-alert"} < $limit * $page}
@@ -66,7 +66,7 @@
                             <th>{intl d='stockalert.bo.default' l='Date'}</th>
                             <th>{intl d='stockalert.bo.default' l='Email'}</th>
                             <th>{intl d='stockalert.bo.default' l='Product'}</th>
-                            {*<th class="actions">{intl l='Actions'}</th>*}
+                            <th class="actions">{intl l='Actions'}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,6 +80,9 @@
                                         <a href="{url path='/admin/products/update' product_id=$ID}">{$ID}. {$TITLE}</a>
                                     {/loop}
                                 {/loop}
+                            </td>
+                            <td class="text-right">
+                                <a class="btn btn-danger" href="{url path='/admin/module/stockalert/delete' id=$ID}"><i class="glyphicon glyphicon-trash"></i></a>
                             </td>
                         </tr>
                     {/loop}
