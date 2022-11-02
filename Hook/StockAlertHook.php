@@ -16,6 +16,7 @@ namespace StockAlert\Hook;
 use StockAlert\StockAlert;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Model\ExportQuery;
 
 /**
  * Class StockAlertHook
@@ -48,12 +49,15 @@ class StockAlertHook extends BaseHook
         $moduleId = $this->getModule()->getModuleId();
         $config = StockAlert::getConfig();
 
+        $exportStockAlert = ExportQuery::create()->filterByRef('stockalert.export.alert')->findOne();
+
         $event->add(
             $this->render(
                 "configuration.html",
                 [
                     'module_id' => $moduleId,
-                    'config' => $config
+                    'config' => $config,
+                    'export_stock_alert_id' => $exportStockAlert->getId()
                 ]
             )
         );

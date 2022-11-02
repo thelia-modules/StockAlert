@@ -19,6 +19,7 @@ use StockAlert\StockAlert;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Form\Exception\FormValidationException;
+use Thelia\Model\ExportQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Tools\URL;
 
@@ -61,7 +62,7 @@ class StockAlertBackOfficeController extends BaseAdminController
         return $this->render(
             "module-configure",
             [
-                "module_code" => StockAlert::getModuleCode()
+                "module_code" => StockAlert::getModuleCode(),
             ]
         );
     }

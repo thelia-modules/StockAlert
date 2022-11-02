@@ -48,14 +48,13 @@
     <div class="row">
 
         <div class="col-md-12 title title-without-tabs">
-            {intl d='stockalert.bo.default' l='List of current subscriptions.'}
+            {intl d='stockalert.bo.default' l='List of current subscriptions.'} {$export_stock_alert_id}
+            <div class="pull-right">
+                <a title="Do this export" class="btn btn-default btn-responsive" href="{url path="/admin/export/{$export_stock_alert_id}"}"><i class="glyphicon glyphicon-open"></i></a>
+            </div>
         </div>
         {$limit={$smarty.get.limit|default:10}}
         {$page={$smarty.get.page|default:1}}
-
-        {if {count type="restocking-alert"} < $limit * $page}
-            {$page=1}
-        {/if}
 
         <div class="col-md-12">
             {ifloop rel="restocking-alert"}
@@ -92,7 +91,6 @@
                             <td colspan="100">
                                 {include
                                     file = "includes/pagination.html"
-
                                     loop_ref       = "restocking-alert"
                                     max_page_count = 10
                                     page_url       = {url path='/admin/module/StockAlert'}

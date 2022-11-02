@@ -28,4 +28,18 @@
             <tag name="hook.event_listener" event="module.configuration" type="back" />
         </hook>
     </hooks>
+
+    <exports>
+        <export id="stockalert.export.alert" class="StockAlert\Export\StockAlertExport" category_id="thelia.export.products">
+            <export_descriptive locale="fr_FR">
+                <title>Export des alertes</title>
+                <description>Export des alertes</description>
+            </export_descriptive>
+            <export_descriptive locale="en_US">
+                <title>Export Alerts</title>
+                <description>Export alerts</description>
+            </export_descriptive>
+        </export>
+    </exports>
+
 </config>
