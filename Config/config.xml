@@ -30,7 +30,7 @@
     </hooks>
 
     <exports>
-        <export id="stockalert.export.stockAlert" class="StockAlert\Export\StockAlertExport" category_id="thelia.export.alert">
+        <export id="stockalert.export.stockAlert" class="StockAlert\Export\StockAlertExport" category_id="thelia.export.products">
             <export_descriptive locale="fr_FR">
                 <title>Export Alerte Stock</title>
                 <description>Export des Alertes Stocks</description>
