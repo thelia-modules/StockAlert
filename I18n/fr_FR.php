@@ -12,4 +12,5 @@ return array(
     'You have already subscribed to this product' => 'Vous avez déjà souscrit à ce produit',
     'You will recieve a notification when the quantity in stock is lower or equal to this value.' => 'Vous recevrez une notification quand la quantité en stock sera inférieure ou égale à cette valeur.',
     'Your request has been taken into account' => 'Votre demande a été prise en compte',
+    'Export stock alert' => 'Exporter les alertes stocks',
 );
