@@ -21,9 +21,9 @@ class StockAlertExport extends JsonFileAbstractExport
 
         $query = '
             SELECT pse.ref, COUNT(product_sale_elements_id) as nbSubscriber
-            FROM restocking_alert
-            JOIN product_sale_elements as pse ON restocking_alert.product_sale_elements_id = pse.id
-            WHERE pse.created_at >= :start AND pse.created_at <= :end
+            FROM restocking_alert as ra
+            JOIN product_sale_elements as pse ON ra.product_sale_elements_id = pse.id
+            WHERE ra.created_at >= :start AND ra.created_at <= :end
             GROUP BY product_sale_elements_id
             ORDER BY nbSubscriber DESC';
 
@@ -36,6 +36,12 @@ class StockAlertExport extends JsonFileAbstractExport
 
         if (file_exists($filename)) {
             unlink($filename);
+        }
+
+        if(!$stmt->fetch(\PDO::FETCH_ASSOC)) {
+            file_put_contents($filename, json_encode(['ref' => 'Aucune donnée', 'nbSubscriber' => '']), FILE_APPEND);
+
+            return $filename;
         }
 
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
