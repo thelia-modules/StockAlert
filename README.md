@@ -25,7 +25,7 @@ Next, go to your Thelia admin panel for module activation.
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/stock-alert-module ~1.2.1
+composer require thelia/stock-alert-module ~2.0
 ```
 
 ## Configuration
