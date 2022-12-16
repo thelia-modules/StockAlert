@@ -18,6 +18,8 @@ use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
 use StockAlert\Model\RestockingAlert;
 use StockAlert\Model\RestockingAlertQuery;
+use StockAlert\Model\StockProductAlert;
+use StockAlert\Model\StockProductAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Newsletter\NewsletterEvent;
@@ -93,7 +95,7 @@ class StockAlertManager implements EventSubscriberInterface
         }
 
         if ($subscribeToNewsLetter) {
-            $this->subscribeNewsletter($email,$event);
+            $this->subscribeNewsletter($email, $event);
         }
 
 
@@ -106,7 +108,7 @@ class StockAlertManager implements EventSubscriberInterface
 
         if (!$customer) {
 
-            $newsletter = new NewsletterEvent($email,"fr_FR");
+            $newsletter = new NewsletterEvent($email, "fr_FR");
             $event->getDispatcher()->dispatch(TheliaEvents::NEWSLETTER_SUBSCRIBE, $newsletter);
 
         }
@@ -161,8 +163,8 @@ class StockAlertManager implements EventSubscriberInterface
 
             $this->mailer->sendEmailMessage(
                 'stockalert_customer',
-                [ $contactEmail => ConfigQuery::read('store_name') ],
-                [ $subscriber->getEmail() => ConfigQuery::read('store_name') ],
+                [$contactEmail => ConfigQuery::read('store_name')],
+                [$subscriber->getEmail() => ConfigQuery::read('store_name')],
                 [
                     'locale' => $subscriber->getLocale(),
                     'pse_id' => $pse->getId(),
@@ -183,7 +185,6 @@ class StockAlertManager implements EventSubscriberInterface
     public function checkStockForAdmin(ProductSaleElementsEvent $event)
     {
         $pseIds = $event->getModel()->getId();
-
         $config = StockAlert::getConfig();
 
         if ($config['enabled']) {
@@ -201,40 +202,15 @@ class StockAlertManager implements EventSubscriberInterface
                 ->toArray();
 
             if (!empty($productIds)) {
-                $this->sendEmailForAdmin($config['emails'], $productIds);
+                foreach ($productIds as $productId) {
+
+                    if (!StockProductAlertQuery::create()->findOneByProductId($productId)){
+                        $stockPseAlert = new StockProductAlert();
+                        $stockPseAlert->setProductId($productId);
+                        $stockPseAlert->save();
+                    }
+                }
             }
-        }
-    }
-
-    public function sendEmailForAdmin($emails, $productIds)
-    {
-        $locale = Lang::getDefaultLanguage()->getLocale();
-
-        $contactEmail = ConfigQuery::read('store_email');
-
-        if ($contactEmail) {
-            $storeName = ConfigQuery::read('store_name');
-
-            $to = [];
-
-            foreach ($emails as $recipient) {
-                $to[$recipient] = $storeName;
-            }
-
-            $this->mailer->sendEmailMessage(
-                'stockalert_administrator',
-                [ $contactEmail => $storeName ],
-                $to,
-                [
-                    'locale' => $locale,
-                    'products_id' => $productIds
-                ],
-                $locale
-            );
-
-            Tlog::getInstance()->debug("Stock Alert sent to administrator " . implode(', ', $emails));
-        } else {
-            Tlog::getInstance()->debug("Restocking Alert: no contact email is defined !");
         }
     }
 }
