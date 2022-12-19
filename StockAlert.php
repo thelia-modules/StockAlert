@@ -14,6 +14,7 @@ namespace StockAlert;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use StockAlert\Model\RestockingAlertQuery;
+use Symfony\Component\Finder\Finder;
 use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Core\Translation\Translator;
 use Thelia\Install\Database;
@@ -116,9 +117,8 @@ class StockAlert extends BaseModule
         }
 
         ConfigQuery::create()
-            ->filterByName([ self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS ])
-            ->delete()
-        ;
+            ->filterByName([self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS])
+            ->delete();
 
         $database = new Database($con);
         $database->insertSql(null, [__DIR__ . '/Config/destroy.sql']);
@@ -146,5 +146,23 @@ class StockAlert extends BaseModule
                 "active" => true
             ]
         ];
+    }
+
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null): void
+    {
+        $finder = Finder::create()
+            ->name('*.sql')
+            ->depth(0)
+            ->sortByName()
+            ->in(__DIR__ . DS . 'Config' . DS . 'update');
+
+        $database = new Database($con);
+
+        /** @var \SplFileInfo $file */
+        foreach ($finder as $file) {
+            if (version_compare($currentVersion, $file->getBasename('.sql'), '<')) {
+                $database->insertSql(null, [$file->getPathname()]);
+            }
+        }
     }
 }
