@@ -13,10 +13,17 @@
         <loop name="restocking-alert" class="StockAlert\Loop\RestockingAlertLoop" />
     </loops>
 
+    <commands>
+        <command class="StockAlert\Command\SendMailStockPse" />
+    </commands>
+
     <services>
         <service id="stockalert.alert.manager" class="StockAlert\EventListeners\StockAlertManager" scope="request">
             <argument type="service" id="mailer"/>
             <tag name="kernel.event_subscriber"/>
+        </service>
+        <service id="stockalert.alert.service" class="StockAlert\Service\adminMailService">
+            <argument type="service" id="mailer"/>
         </service>
     </services>
 

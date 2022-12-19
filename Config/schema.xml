@@ -17,6 +17,19 @@
 
     </table>
 
+    <table name="stock_product_alert" namespace="StockAlert\Model">
+
+        <column name="id" primaryKey="true" autoIncrement="true" required="true" type="INTEGER" />
+        <column name="product_id" required="true" type="INTEGER" />
+
+        <foreign-key foreignTable="product" name="fk_stock_pse_alert_product_id" onDelete="CASCADE" >
+            <reference foreign="id" local="product_id" />
+        </foreign-key>
+
+        <behavior name="timestampable" />
+
+    </table>
+
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />
 
 </database>
