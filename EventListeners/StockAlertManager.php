@@ -23,12 +23,12 @@ use StockAlert\Model\StockProductAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Newsletter\NewsletterEvent;
+use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\ProductSaleElement\ProductSaleElementUpdateEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Log\Tlog;
 use Thelia\Mailer\MailerFactory;
 use Thelia\Model\ConfigQuery;
-use Thelia\Model\Event\ProductSaleElementsEvent;
 use Thelia\Model\Lang;
 use Thelia\Model\NewsletterQuery;
 use Thelia\Model\ProductQuery;
@@ -60,7 +60,7 @@ class StockAlertManager implements EventSubscriberInterface
         return [
             StockAlertEvents::STOCK_ALERT_SUBSCRIBE => ['subscribe', 128],
             TheliaEvents::PRODUCT_UPDATE_PRODUCT_SALE_ELEMENT => ['checkStock', 120],
-            ProductSaleElementsEvent::POST_SAVE => ['checkStockForAdmin', 128],
+            TheliaEvents::ORDER_UPDATE_STATUS => ['checkStockForAdmin', 128],
         ];
     }
 
@@ -182,10 +182,17 @@ class StockAlertManager implements EventSubscriberInterface
         }
     }
 
-    public function checkStockForAdmin(ProductSaleElementsEvent $event)
+    public function checkStockForAdmin(OrderEvent $event)
     {
-        $pseIds = $event->getModel()->getId();
+        $order = $event->getOrder();
+
         $config = StockAlert::getConfig();
+
+        $pseIds = [];
+
+        foreach ($order->getOrderProducts() as $orderProduct) {
+            $pseIds[] = $orderProduct->getProductSaleElementsId();
+        }
 
         if ($config['enabled']) {
             $threshold = $config['threshold'];
