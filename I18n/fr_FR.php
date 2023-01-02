@@ -5,6 +5,7 @@ return array(
     'A comma separated list of email that will recieve notifications' => 'Une liste d\'email séparés par des virgules',
     'Email Address' => 'Adresse email',
     'Enabled' => 'Activé',
+    'Notify' => 'Notifié',
     'List of products nearly out of stock' => 'Liste des produits bentôt en rupture de stock',
     'Product' => 'Produit',
     'The Emails can not be empty' => 'Le champs Email ne peut être vide',

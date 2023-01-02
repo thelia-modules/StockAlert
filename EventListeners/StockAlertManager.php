@@ -217,35 +217,39 @@ class StockAlertManager implements EventSubscriberInterface
         }
     }
 
-    public function sendEmailForAdmin($emails, $productIds)
+    public function sendEmailForAdmin($emails, $productIds): void
     {
-        $locale = Lang::getDefaultLanguage()->getLocale();
+        $config = StockAlert::getConfig();
 
-        $contactEmail = ConfigQuery::read('store_email');
+        if ($config['notify']) {
+            $locale = Lang::getDefaultLanguage()->getLocale();
 
-        if ($contactEmail) {
-            $storeName = ConfigQuery::read('store_name');
+            $contactEmail = ConfigQuery::read('store_email');
 
-            $to = [];
+            if ($contactEmail) {
+                $storeName = ConfigQuery::read('store_name');
 
-            foreach ($emails as $recipient) {
-                $to[$recipient] = $storeName;
+                $to = [];
+
+                foreach ($emails as $recipient) {
+                    $to[$recipient] = $storeName;
+                }
+
+                $this->mailer->sendEmailMessage(
+                    'stockalert_administrator',
+                    [ $contactEmail => $storeName ],
+                    $to,
+                    [
+                        'locale' => $locale,
+                        'products_id' => $productIds
+                    ],
+                    $locale
+                );
+
+                Tlog::getInstance()->debug("Stock Alert sent to administrator " . implode(', ', $emails));
+            } else {
+                Tlog::getInstance()->debug("Restocking Alert: no contact email is defined !");
             }
-
-            $this->mailer->sendEmailMessage(
-                'stockalert_administrator',
-                [ $contactEmail => $storeName ],
-                $to,
-                [
-                    'locale' => $locale,
-                    'products_id' => $productIds
-                ],
-                $locale
-            );
-
-            Tlog::getInstance()->debug("Stock Alert sent to administrator " . implode(', ', $emails));
-        } else {
-            Tlog::getInstance()->debug("Restocking Alert: no contact email is defined !");
         }
     }
 }

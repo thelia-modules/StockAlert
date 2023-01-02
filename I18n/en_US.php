@@ -5,6 +5,7 @@ return array(
     'A comma separated list of email that will recieve notifications' => 'A comma separated list of email that will recieve notifications',
     'Email Address' => 'Email Address',
     'Enabled' => 'Enabled',
+    'Notify' => 'Notify',
     'List of products nearly out of stock' => 'List of products nearly out of stock',
     'Product' => 'Product',
     'The Emails can not be empty' => 'The Emails can not be empty',

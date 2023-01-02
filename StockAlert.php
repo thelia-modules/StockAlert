@@ -32,14 +32,15 @@ use Thelia\Module\BaseModule;
 class StockAlert extends BaseModule
 {
     const MESSAGE_DOMAIN = "stockalert";
-
     const CONFIG_ENABLED = "stockalert_enabled";
     const CONFIG_THRESHOLD = "stockalert_threshold";
     const CONFIG_EMAILS = "stockalert_emails";
+    const CONFIG_NOTIFY = "stockalert_notify";
 
     const DEFAULT_ENABLED = "1";
     const DEFAULT_THRESHOLD = "1";
     const DEFAULT_EMAILS = "";
+    const DEFAULT_NOTIFY = "1";
 
     /** @var Translator */
     protected $translator = null;
@@ -49,7 +50,8 @@ class StockAlert extends BaseModule
         $config = [
             'enabled' => ("1" == ConfigQuery::read(self::CONFIG_ENABLED, self::DEFAULT_ENABLED)),
             'threshold' => intval(ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD)),
-            'emails' => explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS))
+            'emails' => explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS)),
+            'notify' => ("1" == ConfigQuery::read(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY))
         ];
 
         return $config;
@@ -64,6 +66,7 @@ class StockAlert extends BaseModule
         ConfigQuery::write(self::CONFIG_ENABLED, self::DEFAULT_ENABLED);
         ConfigQuery::write(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD);
         ConfigQuery::write(self::CONFIG_EMAILS, ConfigQuery::read('store_notification_emails'));
+        ConfigQuery::write(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY);
 
         // create new message
         if (null === MessageQuery::create()->findOneByName('stockalert_customer')) {
@@ -116,7 +119,7 @@ class StockAlert extends BaseModule
         }
 
         ConfigQuery::create()
-            ->filterByName([ self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS ])
+            ->filterByName([ self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS, self::CONFIG_NOTIFY ])
             ->delete()
         ;
 
