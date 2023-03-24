@@ -98,6 +98,18 @@ class StockAlertConfig extends BaseForm
                 ]
             )
             ->add(
+                'notify',
+                CheckboxType::class,
+                [
+                    "required" => false,
+                    "data" => $config['notify'],
+                    "label" => Translator::getInstance()->trans("Notify", [], StockAlert::MESSAGE_DOMAIN),
+                    "label_attr" => [
+                        "for" => "notify"
+                    ]
+                ]
+            )
+            ->add(
                 'threshold',
                 IntegerType::class,
                 [
