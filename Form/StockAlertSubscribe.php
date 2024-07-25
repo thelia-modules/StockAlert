@@ -36,12 +36,12 @@ use Thelia\Form\BaseForm;
  */
 class StockAlertSubscribe extends BaseForm
 {
-    public function __construct(Request $request, EventDispatcherInterface $eventDispatcher, TranslatorInterface $translator, FormFactoryBuilderInterface $formFactoryBuilder, ValidatorBuilder $validationBuilder, TokenStorageInterface $tokenStorage, string $type = "Symfony\Component\Form\Extension\Core\Type\FormType", array $data = [], array $options = [])
+
+    public function init(Request $request, EventDispatcherInterface $eventDispatcher, TranslatorInterface $translator, FormFactoryBuilderInterface $formFactoryBuilder, ValidatorBuilder $validationBuilder, TokenStorageInterface $tokenStorage, string $type = "Symfony\Component\Form\Extension\Core\Type\FormType", array $data = [], array $options = []): void
     {
         // To prevent "extra_fields_message" in local/modules/StockAlert/Controller/StockAlertFrontOfficeController.php:35
         $options['csrf_protection'] = false;
-
-        parent::__construct($request, $eventDispatcher, $translator, $formFactoryBuilder, $validationBuilder, $tokenStorage, $type, $data, $options);
+        parent::init($request, $eventDispatcher, $translator, $formFactoryBuilder, $validationBuilder, $tokenStorage, $type, $data, $options);
     }
 
     protected function buildForm()
