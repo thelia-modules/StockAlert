@@ -14,6 +14,7 @@
 namespace StockAlert\Loop;
 
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
 use StockAlert\Model\RestockingAlert;
 use StockAlert\Model\RestockingAlertQuery;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -32,35 +33,7 @@ use Thelia\Type\TypeCollection;
  */
 class RestockingAlertLoop extends BaseLoop implements PropelSearchLoopInterface
 {
-
     protected $timestampable = true;
-
-    /**
-     * @param LoopResult $loopResult
-     *
-     * @return LoopResult
-     */
-    public function parseResults(LoopResult $loopResult)
-    {
-        /** @var RestockingAlert $item */
-        foreach ($loopResult->getResultDataCollection() as $item) {
-
-            $loopResultRow = new LoopResultRow($item);
-
-            $loopResultRow
-                ->set("ID", $item->getId())
-                ->set("PRODUCT_SALE_ELEMENTS_ID", $item->getProductSaleElementsId())
-                ->set("EMAIL", $item->getEmail())
-                ->set("LOCALE", $item->getLocale())
-            ;
-
-            $this->addOutputFields($loopResultRow, $item);
-
-            $loopResult->addRow($loopResultRow);
-        }
-
-        return $loopResult;
-    }
 
     /**
      * Definition of loop arguments
@@ -86,7 +59,7 @@ class RestockingAlertLoop extends BaseLoop implements PropelSearchLoopInterface
      *
      * @return \Thelia\Core\Template\Loop\Argument\ArgumentCollection
      */
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
             Argument::createIntListTypeArgument('id'),
@@ -119,9 +92,9 @@ class RestockingAlertLoop extends BaseLoop implements PropelSearchLoopInterface
     /**
      * this method returns a Propel ModelCriteria
      *
-     * @return \Propel\Runtime\ActiveQuery\ModelCriteria
+     * @return ModelCriteria
      */
-    public function buildModelCriteria()
+    public function buildModelCriteria(): ModelCriteria
     {
         $query = RestockingAlertQuery::create();
 
@@ -182,5 +155,32 @@ class RestockingAlertLoop extends BaseLoop implements PropelSearchLoopInterface
         }
 
         return $query;
+    }
+
+    /**
+     * @param LoopResult $loopResult
+     *
+     * @return LoopResult
+     */
+    public function parseResults(LoopResult $loopResult): LoopResult
+    {
+        /** @var RestockingAlert $item */
+        foreach ($loopResult->getResultDataCollection() as $item) {
+
+            $loopResultRow = new LoopResultRow($item);
+
+            $loopResultRow
+                ->set("ID", $item->getId())
+                ->set("PRODUCT_SALE_ELEMENTS_ID", $item->getProductSaleElementsId())
+                ->set("EMAIL", $item->getEmail())
+                ->set("LOCALE", $item->getLocale())
+            ;
+
+            $this->addOutputFields($loopResultRow, $item);
+
+            $loopResult->addRow($loopResultRow);
+        }
+
+        return $loopResult;
     }
 }

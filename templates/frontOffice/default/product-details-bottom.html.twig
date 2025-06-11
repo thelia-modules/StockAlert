@@ -1,0 +1,35 @@
+<div id="product-stock-alert" class="product-stock-alert hidden panel panel-default">
+    <div class="panel-body">
+        <p>
+            {{ 'This product is not available for now.'|trans({}, 'stockalert.fo.default') }}<br>
+            {{ 'Register your email to be notified when it will be available again.'|trans({}, 'stockalert.fo.default') }}
+        </p>
+
+        {{ form_start(stockalert_subscribe_form, {
+            'action': path('module_stockalert_subscribe'),
+            'attr': {'class': 'inline'}
+        }) }}
+
+        {{ form_widget(stockalert_subscribe_form.product_sale_elements_id, {
+            'id': 'stock-alert-id'
+        }) }}
+
+        <div id="product-stock-notify" class="alert hidden"></div>
+
+        <div class="form-group">
+            {{ form_label(stockalert_subscribe_form.email) }}
+            {{ form_widget(stockalert_subscribe_form.email, {
+                'attr': {
+                    'id': 'stock-alert-email',
+                    'class': 'form-control'
+                }
+            }) }}
+        </div>
+
+        <button type="submit" class="btn btn-default">
+            {{ 'Notify me !'|trans({}, 'stockalert.fo.default') }}
+        </button>
+
+        {{ form_end(stockalert_subscribe_form) }}
+    </div>
+</div>
