@@ -13,4 +13,5 @@ return array(
     'You have already subscribed to this product' => 'You have already subscribed to this product',
     'You will recieve a notification when the quantity in stock is lower or equal to this value.' => 'You will recieve a notification when the quantity in stock is lower or equal to this value.',
     'Your request has been taken into account' => 'Your request has been taken into account',
+    'Got it! You’ll receive an email as soon as the product is back in stock.' => 'C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.',
 );

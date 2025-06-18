@@ -16,19 +16,23 @@ readonly class StockAlertService
     {
     }
 
-    public function subscribe(array $subscribeForm) : string
+    public function subscribe(array $subscribeForm): string
     {
+        $locale = 'fr_FR';
+        if ($this->requestStack->getCurrentRequest() !== null) {
+            $locale = $this->requestStack->getCurrentRequest()->getSession()->getLang()->getLocale();
+        }
         $subscriberEvent = new StockAlertEvent(
             $subscribeForm['product_sale_elements_id'],
             $subscribeForm['email'],
             $subscribeForm['newsletter'],
-            $this->requestStack->getCurrentRequest()->getSession()->getLang()->getLocale()
+            $locale
         );
 
         $this->eventDispatcher->dispatch($subscriberEvent, StockAlertEvents::STOCK_ALERT_SUBSCRIBE);
 
         return Translator::getInstance()->trans(
-            "C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.",
+            "Got it! You’ll receive an email as soon as the product is back in stock.",
             [],
             StockAlert::MESSAGE_DOMAIN
         );

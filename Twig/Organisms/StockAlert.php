@@ -61,7 +61,7 @@ class StockAlert extends AbstractController
             }
         } catch (\Throwable $th) {
             $this->success = false;
-            $this->message = 'Erreur lors de la soumission : ' . $th->getMessage();
+            $this->message = 'Erreur lors de la soumission';
         }
     }
 }
