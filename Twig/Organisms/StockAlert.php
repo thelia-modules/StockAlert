@@ -12,6 +12,7 @@
 
 namespace StockAlert\Twig\Organisms;
 
+use StockAlert\Service\StockAlertService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -30,8 +31,11 @@ class StockAlert extends AbstractController
     #[LiveProp]
     public ?int $pseId = null;
     public bool $success = false;
+    public ?string $message = null;
 
-    public function __construct(private FormService $formService)
+
+    public function __construct(private readonly FormService $formService, private StockAlertService $stockAlertService
+    )
     {
     }
 
@@ -47,8 +51,17 @@ class StockAlert extends AbstractController
     {
         try {
             $this->submitForm();
+            if ($this->getForm()->isSubmitted() && $this->getForm()->isValid()) {
+                $data = $this->getForm()->getData();
+                $this->message = $this->stockAlertService->subscribe($data);
+                $this->success = true;
+            } else {
+                $this->success = false;
+                $this->message = 'Erreur : Le formulaire est invalide.';
+            }
         } catch (\Throwable $th) {
-            dd($th);
+            $this->success = false;
+            $this->message = 'Erreur lors de la soumission : ' . $th->getMessage();
         }
     }
 }

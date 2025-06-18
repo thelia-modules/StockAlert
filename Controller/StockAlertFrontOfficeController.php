@@ -15,6 +15,7 @@ namespace StockAlert\Controller;
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
 use StockAlert\Form\StockAlertSubscribe;
+use StockAlert\Service\StockAlertService;
 use StockAlert\StockAlert;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -34,11 +35,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class StockAlertFrontOfficeController extends BaseFrontController
 {
-
     /**
      * @Route("/subscribe", name="_subscribe", methods="POST")
      */
-    public function subscribe(EventDispatcherInterface $eventDispatcher, RequestStack $requestStack)
+    public function subscribe(RequestStack $requestStack,StockAlertService $stockAlertService)
     {
         $success = true;
 
@@ -46,21 +46,7 @@ class StockAlertFrontOfficeController extends BaseFrontController
 
         try {
             $subscribeForm = $this->validateForm($form)->getData();
-
-            $subscriberEvent = new StockAlertEvent(
-                $subscribeForm['product_sale_elements_id'],
-                $subscribeForm['email'],
-                $subscribeForm['newsletter'],
-                $requestStack->getCurrentRequest()->getSession()->getLang()->getLocale()
-            );
-
-            $eventDispatcher->dispatch($subscriberEvent, StockAlertEvents::STOCK_ALERT_SUBSCRIBE);
-
-            $message = Translator::getInstance()->trans(
-                "C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.",
-                [],
-                StockAlert::MESSAGE_DOMAIN
-            );
+            $message = $stockAlertService->subscribe($subscribeForm);
         } catch (\Exception $e) {
             $success = false;
             $message = $e->getMessage();
