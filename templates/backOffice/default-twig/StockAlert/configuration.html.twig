@@ -1,89 +1,65 @@
-{# Configuration #}
-<div class="card mb-3">
-    <div class="card-header">
-        <h3 class="card-title mb-0">{{ 'Configuration.'|trans({}, 'stockalert.bo.default') }}</h3>
-    </div>
-    <div class="card-body">
-        {% if not stock_check_enabled %}
-            <p class="alert alert-info">
-                {{ 'The stock is not not use on the site. Please set the config variable check-available-stock to 1.'|trans({}, 'stockalert.bo.default') }}
-            </p>
-        {% endif %}
-
-        {{ form_start(form, {'attr': {'id': 'stockalert-form', 'class': 'clearfix'}, 'action': path('stockalert.config.save')}) }}
-            {{ form_errors(form) }}
-
-            <div class="mb-3 form-check">
-                {{ form_widget(form.enabled, {'attr': {'class': 'form-check-input'}}) }}
-                {{ form_label(form.enabled, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                {{ form_errors(form.enabled) }}
-            </div>
-
-            <div class="mb-3 form-check">
-                {{ form_widget(form.notify, {'attr': {'class': 'form-check-input'}}) }}
-                {{ form_label(form.notify, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                {{ form_errors(form.notify) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.threshold, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.threshold, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.threshold) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.emails, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.emails, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.emails) }}
-            </div>
-
-            {{ form_rest(form) }}
-
-            <button type="submit" id="stockalert-save" name="stockalert_save" value="save" class="btn btn-primary" title="{{ 'Save'|trans({}, 'stockalert.bo.default') }}">{{ 'Save'|trans({}, 'stockalert.bo.default') }}</button>
-        {{ form_end(form) }}
-    </div>
+<div class="mb-3 card">
+	<div class="card-header">
+		<h3 class="mb-0 card-title">{{ 'Configuration.'|trans({}, 'stockalert.bo.default') }}</h3>
+	</div>
+	<div class="card-body">
+		{% if not stock_check_enabled %}
+			<p class="alert alert-info">
+				{{ 'The stock is not not use on the site. Please set the config variable check-available-stock to 1.'|trans({}, 'stockalert.bo.default') }}
+			</p>
+		{% endif %}
+		{% form_theme form with bo_form_themes only %}
+		{{ form_start(form, {'action': path('stockalert.config.save')}) }}
+		{{ form_errors(form) }}
+		{{form_rest(form) }}
+		<button type="submit" id="stockalert-save" class="btn btn-primary">{{ 'Save'|trans({}, 'stockalert.bo.default') }}</button>
+		{{ form_end(form) }}
+	</div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-header">
-        <h3 class="card-title mb-0">{{ 'List of current subscriptions.'|trans({}, 'stockalert.bo.default') }}</h3>
-    </div>
-    <div class="card-body">
-        {% if subscriptions is not empty %}
-            <div class="table-responsive">
-                <table class="table table-striped" id="alert_list">
-                    <thead>
-                        <tr>
-                            <th>{{ 'Date'|trans({}, 'stockalert.bo.default') }}</th>
-                            <th>{{ 'Email'|trans({}, 'stockalert.bo.default') }}</th>
-                            <th>{{ 'Product'|trans({}, 'stockalert.bo.default') }}</th>
-                            <th class="actions">{{ 'Actions'|trans }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for subscription in subscriptions %}
-                            <tr>
-                                <td>{{ subscription.createDate ? subscription.createDate|date('Y-m-d') : '' }}</td>
-                                <td>{{ subscription.email }}</td>
-                                <td>
-                                    {% if subscription.productId %}
-                                        <a href="{{ path('admin.products.update', {'product_id': subscription.productId}) }}">{{ subscription.productId }}. {{ subscription.productTitle }}</a>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end">
-                                    <form method="post" class="d-inline" action="{{ path('stockalert.delete', {'id': subscription.id}) }}&_token={{ assignToken() }}">
-                                        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="alert alert-warning">
-                <p>{{ 'There is no subscriptions.'|trans({}, 'stockalert.bo.default') }}</p>
-            </div>
-        {% endif %}
-    </div>
+<div class="mb-3 card">
+	<div class="card-header">
+		<h3 class="mb-0 card-title">{{ 'List of current subscriptions.'|trans({}, 'stockalert.bo.default') }}</h3>
+	</div>
+	<div class="card-body">
+		{% if subscriptions is not empty %}
+			<div class="table-responsive">
+				<table class="table table-striped" id="alert_list">
+					<thead>
+						<tr>
+							<th>{{ 'Date'|trans({}, 'stockalert.bo.default') }}</th>
+							<th>{{ 'Email'|trans({}, 'stockalert.bo.default') }}</th>
+							<th>{{ 'Product'|trans({}, 'stockalert.bo.default') }}</th>
+							<th class="actions">{{ 'Actions'|trans }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for subscription in subscriptions %}
+							<tr>
+								<td>{{ subscription.createDate ? subscription.createDate|date('Y-m-d') : '' }}</td>
+								<td>{{ subscription.email }}</td>
+								<td>
+									{% if subscription.productId %}
+										<a href="{{ path('admin.products.update', {'product_id': subscription.productId}) }}">{{ subscription.productId }}.
+											{{ subscription.productTitle }}</a>
+									{% endif %}
+								</td>
+								<td class="text-end">
+									<form method="post" class="d-inline" action="{{ path('stockalert.config.delete', {'id': subscription.id}) }}&_token={{ assignToken() }}">
+										<button type="submit" class="btn btn-danger btn-sm">
+											<i class="bi bi-trash"></i>
+										</button>
+									</form>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% else %}
+			<div class="alert alert-warning">
+				<p>{{ 'There is no subscriptions.'|trans({}, 'stockalert.bo.default') }}</p>
+			</div>
+		{% endif %}
+	</div>
 </div>

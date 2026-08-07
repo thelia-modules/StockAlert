@@ -1,26 +1,34 @@
 <?php
-/*************************************************************************************/
-/*      This file is part of the Thelia package.                                     */
-/*                                                                                   */
-/*      Copyright (c) OpenStudio                                                     */
-/*      email : dev@thelia.net                                                       */
-/*      web : http://www.thelia.net                                                  */
-/*                                                                                   */
-/*      For the full copyright and license information, please view the LICENSE.txt  */
-/*      file that was distributed with this source code.                             */
-/*************************************************************************************/
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the Thelia package.
+ * http://www.thelia.net
+ *
+ * (c) OpenStudio <info@thelia.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+/*      Copyright (c) OpenStudio */
+/*      email : dev@thelia.net */
+/*      web : http://www.thelia.net */
+
+/*      For the full copyright and license information, please view the LICENSE.txt */
+/*      file that was distributed with this source code. */
 
 namespace StockAlert\Controller;
-
 
 use StockAlert\Form\StockAlertConfig;
 use StockAlert\Model\RestockingAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Thelia\Core\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
@@ -28,14 +36,15 @@ use Thelia\Tools\TokenProvider;
 use Thelia\Tools\URL;
 
 /**
- * Class StockAlertBackOfficeController
- * @package StockAlert\Controller
+ * Class StockAlertBackOfficeController.
+ *
  * @author Baixas Alban <abaixas@openstudio.fr>
  * @author Julien Chanséaume <julien@thelia.net>
  */
+#[Route('/admin/modules/StockAlert', name: 'stockalert.config')]
 class StockAlertBackOfficeController extends BaseAdminController
 {
-    #[Route('/admin/module/stockalert/save', name: 'stockalert.config.save', methods: ['POST'])]
+    #[Route('/save', name: '.save', methods: ['POST'])]
     public function configuration(ParserContext $parserContext): RedirectResponse
     {
         $errorMessage = null;
@@ -65,11 +74,11 @@ class StockAlertBackOfficeController extends BaseAdminController
         }
 
         return new RedirectResponse(
-            URL::getInstance()->absoluteUrl('/admin/module/' . StockAlert::getModuleCode())
+            URL::getInstance()->absoluteUrl('/admin/module/'.StockAlert::getModuleCode())
         );
     }
 
-    #[Route('/admin/module/stockalert/delete', name: 'stockalert.delete', methods: ['POST'])]
+    #[Route('/delete', name: '.delete', methods: ['POST'])]
     public function deleteEmail(RequestStack $requestStack, Session $session, TokenProvider $tokenProvider): RedirectResponse
     {
         $request = $requestStack->getCurrentRequest();
@@ -84,6 +93,8 @@ class StockAlertBackOfficeController extends BaseAdminController
             }
         }
 
-        return new RedirectResponse(URL::getInstance()->absoluteUrl($session->getReturnToUrl()));
+        return new RedirectResponse(
+            URL::getInstance()->absoluteUrl('/admin/module/'.StockAlert::getModuleCode())
+        );
     }
 }

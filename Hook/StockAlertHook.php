@@ -1,21 +1,28 @@
 <?php
-/*************************************************************************************/
-/*      This file is part of the Thelia package.                                     */
-/*                                                                                   */
-/*      Copyright (c) OpenStudio                                                     */
-/*      email : dev@thelia.net                                                       */
-/*      web : http://www.thelia.net                                                  */
-/*                                                                                   */
-/*      For the full copyright and license information, please view the LICENSE.txt  */
-/*      file that was distributed with this source code.                             */
-/*************************************************************************************/
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Thelia package.
+ * http://www.thelia.net
+ *
+ * (c) OpenStudio <info@thelia.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+/*      Copyright (c) OpenStudio */
+/*      email : dev@thelia.net */
+/*      web : http://www.thelia.net */
+
+/*      For the full copyright and license information, please view the LICENSE.txt */
+/*      file that was distributed with this source code. */
 
 namespace StockAlert\Hook;
 
 use StockAlert\Form\StockAlertConfig;
 use StockAlert\Model\RestockingAlertQuery;
-use StockAlert\StockAlert;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Form\TheliaFormFactory;
@@ -26,8 +33,8 @@ use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 
 /**
- * Class StockAlertHook
- * @package StockAlert\Hook
+ * Class StockAlertHook.
+ *
  * @author Julien Chanséaume <julien@thelia.net>
  */
 class StockAlertHook extends BaseHook
@@ -62,7 +69,7 @@ class StockAlertHook extends BaseHook
     {
         $event->add(
             $this->render(
-                "product-details-bottom.html"
+                'product-details-bottom.html'
             )
         );
     }
@@ -71,23 +78,20 @@ class StockAlertHook extends BaseHook
     {
         $event->add(
             $this->render(
-                "product.javascript-initialization.html"
+                'product.javascript-initialization.html'
             )
         );
     }
 
     public function onModuleConfiguration(HookRenderEvent $event): void
     {
-        $config = StockAlert::getConfig();
-
         $form = $this->formFactory->createForm(StockAlertConfig::getName());
-
         $event->add(
             $this->render(
-                "StockAlert/configuration.html.twig",
+                'StockAlert/configuration.html.twig',
                 [
                     'form' => $form->createView()->getView(),
-                    'stock_check_enabled' => "1" === ConfigQuery::read("check-available-stock"),
+                    'stock_check_enabled' => '1' === ConfigQuery::read('check-available-stock'),
                     'subscriptions' => $this->getSubscriptions(),
                 ]
             )
@@ -104,7 +108,6 @@ class StockAlertHook extends BaseHook
     {
         $request = $this->getRequest();
         $locale = $request !== null ? $request->getLocale() : 'en_US';
-
         $alerts = RestockingAlertQuery::create()
             ->orderById(\Propel\Runtime\ActiveQuery\Criteria::DESC)
             ->find();
@@ -132,7 +135,6 @@ class StockAlertHook extends BaseHook
                 'productTitle' => $productTitle,
             ];
         }
-
         return $subscriptions;
     }
 }

@@ -1,64 +1,70 @@
 <?php
-/*************************************************************************************/
-/*      This file is part of the Thelia package.                                     */
-/*                                                                                   */
-/*      Copyright (c) OpenStudio                                                     */
-/*      email : dev@thelia.net                                                       */
-/*      web : http://www.thelia.net                                                  */
-/*                                                                                   */
-/*      For the full copyright and license information, please view the LICENSE.txt  */
-/*      file that was distributed with this source code.                             */
-/*************************************************************************************/
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the Thelia package.
+ * http://www.thelia.net
+ *
+ * (c) OpenStudio <info@thelia.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+/*      Copyright (c) OpenStudio */
+/*      email : dev@thelia.net */
+/*      web : http://www.thelia.net */
+
+/*      For the full copyright and license information, please view the LICENSE.txt */
+/*      file that was distributed with this source code. */
 
 namespace StockAlert;
 
 use Propel\Runtime\Connection\ConnectionInterface;
-use StockAlert\Model\RestockingAlertQuery;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
+use Thelia\Core\Install\Database;
 use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Core\Translation\Translator;
-use Thelia\Core\Install\Database;
 use Thelia\Model\ConfigQuery;
-use Thelia\Model\LangQuery;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
 use Thelia\Module\BaseModule;
 
 /**
- * Class StockAlert
- * @package StockAlert
+ * Class StockAlert.
+ *
  * @author Baixas Alban <abaixas@openstudio.fr>
  */
 class StockAlert extends BaseModule
 {
-    const MESSAGE_DOMAIN = "stockalert";
-    const CONFIG_ENABLED = "stockalert_enabled";
-    const CONFIG_THRESHOLD = "stockalert_threshold";
-    const CONFIG_EMAILS = "stockalert_emails";
-    const CONFIG_NOTIFY = "stockalert_notify";
+    public const MESSAGE_DOMAIN = 'stockalert';
+    public const CONFIG_ENABLED = 'stockalert_enabled';
+    public const CONFIG_THRESHOLD = 'stockalert_threshold';
+    public const CONFIG_EMAILS = 'stockalert_emails';
+    public const CONFIG_NOTIFY = 'stockalert_notify';
 
-    const DEFAULT_ENABLED = "1";
-    const DEFAULT_THRESHOLD = "1";
-    const DEFAULT_EMAILS = "";
-    const DEFAULT_NOTIFY = "1";
+    public const DEFAULT_ENABLED = '1';
+    public const DEFAULT_THRESHOLD = '1';
+    public const DEFAULT_EMAILS = '';
+    public const DEFAULT_NOTIFY = '1';
 
     /** @var Translator */
-    protected $translator = null;
+    protected $translator;
 
     public static function getConfig()
     {
         $config = [
-            'enabled' => ("1" == ConfigQuery::read(self::CONFIG_ENABLED, self::DEFAULT_ENABLED)),
-            'threshold' => intval(ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD)),
+            'enabled' => ('1' == ConfigQuery::read(self::CONFIG_ENABLED, self::DEFAULT_ENABLED)),
+            'threshold' => (int) ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD),
             'emails' => explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS)),
-            'notify' => ("1" == ConfigQuery::read(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY))
+            'notify' => ('1' == ConfigQuery::read(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY)),
         ];
 
         return $config;
     }
 
     /**
-     * @param ConnectionInterface|null $con
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function postActivation(?ConnectionInterface $con = null): void
@@ -97,16 +103,16 @@ class StockAlert extends BaseModule
                 ->save();
         }
 
-        if (!self::getConfigValue('is_initialized', false)){
+        if (!self::getConfigValue('is_initialized', false)) {
             $database = new Database($con);
-            $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
+            $database->insertSql(null, [__DIR__.'/Config/thelia.sql']);
             self::setConfigValue('is_initialized', true);
         }
     }
 
     /**
-     * @param ConnectionInterface|null $con
      * @param bool $deleteModuleData
+     *
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function destroy(?ConnectionInterface $con = null, $deleteModuleData = false): void
@@ -119,21 +125,21 @@ class StockAlert extends BaseModule
         }
 
         ConfigQuery::create()
-            ->filterByName([ self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS, self::CONFIG_NOTIFY ])
+            ->filterByName([self::CONFIG_ENABLED, self::CONFIG_THRESHOLD, self::CONFIG_EMAILS, self::CONFIG_NOTIFY])
             ->delete()
         ;
 
         $database = new Database($con);
-        $database->insertSql(null, [__DIR__ . '/Config/destroy.sql']);
+        $database->insertSql(null, [__DIR__.'/Config/destroy.sql']);
     }
 
-    protected function trans($id, array $parameters = [], $locale = null)
+    protected function trans(string $id, array $parameters = [], $locale = null)
     {
         if (null === $this->translator) {
             $this->translator = Translator::getInstance();
         }
 
-        return $this->translator->trans($id, $parameters, StockAlert::MESSAGE_DOMAIN, $locale);
+        return $this->translator->trans($id, $parameters, self::MESSAGE_DOMAIN, $locale);
     }
 
     public function getHooks(): array
@@ -142,19 +148,19 @@ class StockAlert extends BaseModule
             [
                 'code' => 'product.stock-alert',
                 'type' => TemplateDefinition::FRONT_OFFICE,
-                "title" => array(
-                    "fr_FR" => "Hook alertes stock",
-                    "en_US" => "Stock alert hook",
-                ),
-                "active" => true
-            ]
+                'title' => [
+                    'fr_FR' => 'Hook alertes stock',
+                    'en_US' => 'Stock alert hook',
+                ],
+                'active' => true,
+            ],
         ];
     }
 
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([__DIR__ . '/I18n/*'])
+            ->exclude([__DIR__.'/I18n/*'])
             ->autowire(true)
             ->autoconfigure(true);
     }

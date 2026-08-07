@@ -1,5 +1,5 @@
 <div {{ attributes }}>
-	<button class="self-start mt-4 Button Button--large open-modal" type="button" data-action="live#action" data-live-action-param="openModal">
+	<button class="self-start mb-4 Button Button--large open-modal" type="button" data-action="live#action" data-live-action-param="openModal">
 		{{'Alert me'|trans}}
 		<span class="icon icon-right">
 			{{ ux_icon('bell') }}
@@ -27,7 +27,7 @@
 
 		<input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ field_value(form.product_sale_elements_id) }}">
 		{{form_rest(form)}}
-		{% include "@components/Molecules/Button/Button.html.twig" with {type:"submit", text: "Confirm"|trans, variant: "large", classes: "self-center" } %}
+		{{ component('Flexy:Button', {text: 'Confirm'|trans, size: 'large', type: 'submit', class: 'self-center'}) }}
 		{{form_end(form)}}
 	{% endif %}
 	{% endset %}
