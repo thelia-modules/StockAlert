@@ -19,6 +19,6 @@
         <email>julien@thelia.net</email>
     </author>
     <type>classic</type>
-    <thelia>3.0.0</thelia>
+    <thelia>2.6.0</thelia>
     <stability>rc</stability>
 </module>
