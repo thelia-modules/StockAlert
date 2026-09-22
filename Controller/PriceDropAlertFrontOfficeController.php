@@ -20,10 +20,11 @@ use StockAlert\PriceDrop\PriceDropSubscriptionService;
 use StockAlert\PriceDrop\UnsubscribeTokenSigner;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Thelia\Core\HttpFoundation\Request;
-use Thelia\Model\LangQuery;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Front\BaseFrontController;
+use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Model\LangQuery;
 
 /**
  * The unsubscribe link from a confirmation: no account, no session needed. The
@@ -64,8 +65,10 @@ final class PriceDropAlertFrontOfficeController extends BaseFrontController
     {
         $lang = null !== $alert?->getLocale() ? LangQuery::create()->findOneByLocale($alert->getLocale()) : null;
 
-        if (null !== $lang && $request->hasSession()) {
-            $request->getSession()->setLang($lang);
+        $session = $request->hasSession() ? $request->getSession() : null;
+
+        if (null !== $lang && $session instanceof Session) {
+            $session->setLang($lang);
         }
     }
 }

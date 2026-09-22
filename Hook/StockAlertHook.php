@@ -21,10 +21,9 @@ declare(strict_types=1);
 
 namespace StockAlert\Hook;
 
-use StockAlert\Model\PriceDropAlertQuery;
-use StockAlert\Controller\PriceDropAlertBackOfficeController;
 use StockAlert\Form\PriceDropAlertConfig;
 use StockAlert\Form\StockAlertConfig;
+use StockAlert\Model\PriceDropAlertQuery;
 use StockAlert\Model\RestockingAlertQuery;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;

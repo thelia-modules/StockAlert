@@ -97,15 +97,9 @@ final readonly class PriceDropQueueProcessor
      */
     private function send(PriceDropAlert $alert): bool
     {
+        // Both rows are there as long as the alert is: the foreign keys cascade.
         $productSaleElements = $alert->getProductSaleElements();
         $currency = $alert->getCurrency();
-
-        if (null === $productSaleElements || null === $currency) {
-            // The FK cascade normally removes these rows; a leftover one has nothing to say.
-            $alert->delete();
-
-            return false;
-        }
 
         try {
             $this->mailer->sendEmailMessageOrFail(

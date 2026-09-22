@@ -22,6 +22,7 @@ use StockAlert\PriceDrop\UnsubscribeTokenSigner;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -43,11 +44,10 @@ use Thelia\Tools\URL;
 #[AsLiveComponent(name: 'PriceDropAlert', template: '@StockAlertModule/components/PriceDropAlert.html.twig')]
 class PriceDropAlert extends AbstractController
 {
-    /** The front catalog of the module: I18n/frontOffice/default. */
-    public const TRANSLATION_DOMAIN = 'stockalert.fo.default';
-
     use ComponentWithFormTrait;
     use DefaultActionTrait;
+    /** The front catalog of the module: I18n/frontOffice/default. */
+    public const TRANSLATION_DOMAIN = 'stockalert.fo.default';
 
     #[LiveProp(updateFromParent: true)]
     public ?int $pseId = null;
@@ -79,7 +79,22 @@ class PriceDropAlert extends AbstractController
     #[ExposeInTemplate('currency_code')]
     public function currencyCode(): string
     {
-        return $this->requestStack->getSession()->getCurrency()->getCode();
+        return $this->session()->getCurrency()->getCode();
+    }
+
+    /**
+     * The front session is Thelia's, which knows the visitor's language, currency
+     * and account; the request stack only promises the Symfony interface.
+     */
+    private function session(): Session
+    {
+        $session = $this->requestStack->getSession();
+
+        if (!$session instanceof Session) {
+            throw new \LogicException('The price drop alert needs the shop session.');
+        }
+
+        return $session;
     }
 
     protected function instantiateForm(): FormInterface
@@ -99,7 +114,7 @@ class PriceDropAlert extends AbstractController
             return;
         }
 
-        $session = $this->requestStack->getSession();
+        $session = $this->session();
         $customer = $session->getCustomerUser();
 
         try {

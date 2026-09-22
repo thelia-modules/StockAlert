@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -27,9 +29,9 @@ use Thelia\Core\Translation\Translator;
 #[AsLiveComponent(name: 'StockAlert', template: '@StockAlertModule/components/StockAlert.html.twig')]
 class StockAlert extends AbstractController
 {
+    use ComponentToolsTrait;
     use ComponentWithFormTrait;
     use DefaultActionTrait;
-    use ComponentToolsTrait;
 
     #[LiveProp(updateFromParent: true)]
     public ?int $pseId = null;
@@ -40,24 +42,23 @@ class StockAlert extends AbstractController
     #[LiveProp]
     public ?string $message = null;
 
-
     public function __construct(
         private readonly FormServiceInterface $formService,
-        private StockAlertService $stockAlertService
+        private StockAlertService $stockAlertService,
     ) {
     }
 
     protected function instantiateForm(): FormInterface
     {
         $form = $this->formService->getFormByName('stockalert_subscribe_form', [
-            'product_sale_elements_id' => $this->pseId
+            'product_sale_elements_id' => $this->pseId,
         ]);
 
         return $form;
     }
 
     #[LiveAction]
-    public function openModal()
+    public function openModal(): void
     {
         $this->dispatchBrowserEvent('modal:open');
     }

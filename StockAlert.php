@@ -184,7 +184,7 @@ class StockAlert extends BaseModule
             }
         }
 
-        if (null !== MessageQuery::create()->findOneByName(self::MESSAGE_PRICE_DROP, $con)) {
+        if (null !== MessageQuery::create()->findOneByName(self::MESSAGE_PRICE_DROP)) {
             return;
         }
 

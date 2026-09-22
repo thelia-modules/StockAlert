@@ -116,7 +116,6 @@ class PriceDropAlertBackOfficeController extends BaseAdminController
      * A queued one is still a subscription — its email is written but not sent
      * yet — so it is counted in the total and again in its own column.
      */
-
     private static function countFollowedProducts(): int
     {
         $productIds = PriceDropAlertQuery::create()->pending()
