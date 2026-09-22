@@ -38,13 +38,14 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
     {
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
 
-        $reference = $this->service->subscribe($this->request($productSaleElements->getId(), 'Shopper@Example.com '));
+        $suffix = bin2hex(random_bytes(4));
+        $reference = $this->service->subscribe($this->request($productSaleElements->getId(), 'Shopper-'.$suffix.'@Example.com '));
 
         self::assertSame(40.0, $reference);
 
         $alert = PriceDropAlertQuery::create()->filterByProductSaleElementsId($productSaleElements->getId())->findOne();
         self::assertNotNull($alert);
-        self::assertSame('shopper@example.com', $alert->getEmail());
+        self::assertSame('shopper-'.$suffix.'@example.com', $alert->getEmail());
         self::assertSame(40.0, (float) $alert->getReferencePrice());
         self::assertSame(PriceDropAlert::STATUS_ACTIVE, $alert->getStatus());
         self::assertSame($this->currency->getId(), $alert->getCurrencyId());
@@ -70,7 +71,7 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
     public function testAKnownCustomerIsAttachedToItsSubscription(): void
     {
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
-        $customer = $this->factory->customer(CustomerTitleQuery::create()->findOne());
+        $customer = $this->factory->customer(CustomerTitleQuery::create()->findOne(), ['email' => $this->uniqueEmail('customer')]);
 
         $this->service->subscribe(new SubscriptionRequest(
             $productSaleElements->getId(),

@@ -23,6 +23,7 @@ namespace StockAlert;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use StockAlert\DependencyInjection\Compiler\PublicServicesForTestsPass;
+use StockAlert\DependencyInjection\Compiler\RegisterModuleTranslationsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
@@ -278,7 +279,10 @@ class StockAlert extends BaseModule
      */
     public static function getCompilers(): array
     {
-        return [[new PublicServicesForTestsPass(), PassConfig::TYPE_BEFORE_REMOVING]];
+        return [
+            [new RegisterModuleTranslationsPass(__DIR__, self::MESSAGE_DOMAIN), PassConfig::TYPE_BEFORE_OPTIMIZATION],
+            [new PublicServicesForTestsPass(), PassConfig::TYPE_BEFORE_REMOVING],
+        ];
     }
 
     /**

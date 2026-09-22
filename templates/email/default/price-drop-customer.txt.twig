@@ -1,0 +1,13 @@
+{{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}
+
+{{ 'You asked us to tell you when the price of %product% goes down. It just did.'|trans({'%product%': product_title}, 'stockalert.email.default', locale) }}
+
+{{ 'Price when you subscribed:'|trans({}, 'stockalert.email.default', locale) }} {{ format_money(old_price, currency_id, locale) }}
+{{ 'Price today:'|trans({}, 'stockalert.email.default', locale) }} {{ format_money(new_price, currency_id, locale) }}
+
+{{ 'See the product'|trans({}, 'stockalert.email.default', locale) }} : {{ product_url }}
+
+{{ 'This alert is sent once: subscribe again on the product page to follow the next drop.'|trans({}, 'stockalert.email.default', locale) }}
+
+{{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }},
+{{ 'The %store% team.'|trans({'%store%': config('store_name')}, 'stockalert.email.default', locale) }}
