@@ -19,9 +19,12 @@ use StockAlert\Model\RestockingAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Core\Security\AccessManager;
+use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
@@ -38,8 +41,12 @@ use Thelia\Tools\URL;
 class StockAlertBackOfficeController extends BaseAdminController
 {
     #[Route('/save', name: '.save', methods: ['POST'])]
-    public function configuration(ParserContext $parserContext): RedirectResponse
+    public function configuration(ParserContext $parserContext): Response
     {
+        if (null !== $response = $this->checkAuth([AdminResources::MODULE], ['StockAlert'], AccessManager::UPDATE)) {
+            return $response;
+        }
+
         $errorMessage = null;
 
         $form = $this->createForm(StockAlertConfig::getName());
@@ -72,8 +79,12 @@ class StockAlertBackOfficeController extends BaseAdminController
     }
 
     #[Route('/delete', name: '.delete', methods: ['POST'])]
-    public function deleteEmail(RequestStack $requestStack, Session $session, TokenProvider $tokenProvider): RedirectResponse
+    public function deleteEmail(RequestStack $requestStack, Session $session, TokenProvider $tokenProvider): Response
     {
+        if (null !== $response = $this->checkAuth([AdminResources::MODULE], ['StockAlert'], AccessManager::UPDATE)) {
+            return $response;
+        }
+
         $request = $requestStack->getCurrentRequest();
 
         $tokenProvider->checkToken((string) $request->query->get('_token'));
