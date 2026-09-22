@@ -1,0 +1,10 @@
+{# One block for both alerts, so the product page never stacks two look-alike forms. #}
+<section class="ProductAlerts flex flex-col gap-4 mt-6" aria-labelledby="product-alerts-title">
+    <h2 id="product-alerts-title" class="h6">{{ 'Alerts on this variant'|trans({}, 'stockalert.fo.default') }}</h2>
+    {% if outOfStock %}
+        {{ component('StockAlert', {pseId: pseId}) }}
+    {% endif %}
+    {% if priceDropEnabled %}
+        {{ component('PriceDropAlert', {pseId: pseId, taxedPrice: taxedPrice}) }}
+    {% endif %}
+</section>

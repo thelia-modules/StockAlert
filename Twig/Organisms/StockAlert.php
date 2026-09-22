@@ -22,6 +22,7 @@ use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Form\FormServiceInterface;
+use Thelia\Core\Translation\Translator;
 
 #[AsLiveComponent(name: 'StockAlert', template: '@StockAlertModule/components/StockAlert.html.twig')]
 class StockAlert extends AbstractController
@@ -30,9 +31,13 @@ class StockAlert extends AbstractController
     use DefaultActionTrait;
     use ComponentToolsTrait;
 
-    #[LiveProp]
+    #[LiveProp(updateFromParent: true)]
     public ?int $pseId = null;
+
+    #[LiveProp]
     public bool $success = false;
+
+    #[LiveProp]
     public ?string $message = null;
 
 
@@ -64,15 +69,18 @@ class StockAlert extends AbstractController
             $this->submitForm();
             if ($this->getForm()->isSubmitted() && $this->getForm()->isValid()) {
                 $data = $this->getForm()->getData();
+                // The form keeps the sale element it was built with; the parent page may
+                // have switched variant since, and the live prop is what follows it.
+                $data['product_sale_elements_id'] = $this->pseId ?? $data['product_sale_elements_id'];
                 $this->message = $this->stockAlertService->subscribe($data);
                 $this->success = true;
             } else {
                 $this->success = false;
-                $this->message = 'Erreur : Le formulaire est invalide.';
+                $this->message = Translator::getInstance()->trans('Please enter a valid email address.', [], 'stockalert.fo.default');
             }
-        } catch (\Throwable $th) {
+        } catch (\Throwable) {
             $this->success = false;
-            $this->message = $th;
+            $this->message = Translator::getInstance()->trans('Something went wrong. Please try again later.', [], 'stockalert.fo.default');
         }
     }
 }
