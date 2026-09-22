@@ -39,12 +39,14 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
 
         $suffix = bin2hex(random_bytes(4));
-        $reference = $this->service->subscribe($this->request($productSaleElements->getId(), 'Shopper-'.$suffix.'@Example.com '));
+        $outcome = $this->service->subscribe($this->request($productSaleElements->getId(), 'Shopper-'.$suffix.'@Example.com '));
 
-        self::assertSame(40.0, $reference);
+        self::assertSame(40.0, $outcome->untaxedReferencePrice);
 
         $alert = PriceDropAlertQuery::create()->filterByProductSaleElementsId($productSaleElements->getId())->findOne();
         self::assertNotNull($alert);
+        self::assertSame($alert->getId(), $outcome->priceDropAlertId);
+        self::assertSame($alert->getExpiresAt()->getTimestamp(), $outcome->expiresAt->getTimestamp());
         self::assertSame('shopper-'.$suffix.'@example.com', $alert->getEmail());
         self::assertSame(40.0, (float) $alert->getReferencePrice());
         self::assertSame(PriceDropAlert::STATUS_ACTIVE, $alert->getStatus());
@@ -63,9 +65,9 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
         $this->repriceDefaultCurrency($productSaleElements, 40.0, 32.0, promo: true);
 
-        $reference = $this->service->subscribe($this->request($productSaleElements->getId(), $this->uniqueEmail()));
+        $outcome = $this->service->subscribe($this->request($productSaleElements->getId(), $this->uniqueEmail()));
 
-        self::assertSame(32.0, $reference);
+        self::assertSame(32.0, $outcome->untaxedReferencePrice);
     }
 
     public function testAKnownCustomerIsAttachedToItsSubscription(): void
@@ -89,11 +91,12 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
         $email = $this->uniqueEmail();
 
-        $this->service->subscribe($this->request($productSaleElements->getId(), $email));
+        $first = $this->service->subscribe($this->request($productSaleElements->getId(), $email));
         $this->repriceDefaultCurrency($productSaleElements, 50.0);
         $second = $this->service->subscribe($this->request($productSaleElements->getId(), $email));
 
-        self::assertSame(40.0, $second);
+        self::assertSame(40.0, $second->untaxedReferencePrice);
+        self::assertSame($first->priceDropAlertId, $second->priceDropAlertId);
         self::assertSame(1, PriceDropAlertQuery::create()->filterByEmail($email)->count());
     }
 

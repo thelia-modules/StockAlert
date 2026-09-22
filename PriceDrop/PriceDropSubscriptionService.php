@@ -36,12 +36,10 @@ final readonly class PriceDropSubscriptionService
      * is left as it is, with its first reference price: the caller answers the same
      * way in both cases, so the form never tells whether an address is known.
      *
-     * @return float the untaxed reference price recorded, or already recorded, for this address
-     *
      * @throws SubscriptionRefusedException
      * @throws PropelException
      */
-    public function subscribe(SubscriptionRequest $request): float
+    public function subscribe(SubscriptionRequest $request): SubscriptionOutcome
     {
         if (!$this->config->isEnabled()) {
             throw new SubscriptionRefusedException(SubscriptionRefusal::Disabled);
@@ -73,7 +71,7 @@ final readonly class PriceDropSubscriptionService
             ->findOne();
 
         if (null !== $existing) {
-            return (float) $existing->getReferencePrice();
+            return self::outcomeOf($existing);
         }
 
         $activeCount = PriceDropAlertQuery::create()
@@ -93,7 +91,7 @@ final readonly class PriceDropSubscriptionService
             throw new SubscriptionRefusedException(SubscriptionRefusal::UnknownProductSaleElement);
         }
 
-        (new PriceDropAlert())
+        $alert = (new PriceDropAlert())
             ->setProductSaleElementsId($productSaleElements->getId())
             ->setCustomerId($customer?->getId())
             ->setEmail($email)
@@ -102,10 +100,15 @@ final readonly class PriceDropSubscriptionService
             ->setReferencePrice(self::decimal($referencePrice))
             ->setStatus(PriceDropAlert::STATUS_ACTIVE)
             ->setAttempts(0)
-            ->setExpiresAt(new \DateTimeImmutable(\sprintf('+%d days', $this->config->expirationDays())))
-            ->save();
+            ->setExpiresAt(new \DateTimeImmutable(\sprintf('+%d days', $this->config->expirationDays())));
+        $alert->save();
 
-        return $referencePrice;
+        return self::outcomeOf($alert);
+    }
+
+    private static function outcomeOf(PriceDropAlert $alert): SubscriptionOutcome
+    {
+        return new SubscriptionOutcome($alert->getId(), (float) $alert->getReferencePrice(), $alert->getExpiresAt());
     }
 
     /**

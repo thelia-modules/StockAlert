@@ -18,6 +18,7 @@ use StockAlert\PriceDrop\PriceDropSubscriptionService;
 use StockAlert\PriceDrop\SubscriptionRefusal;
 use StockAlert\PriceDrop\SubscriptionRefusedException;
 use StockAlert\PriceDrop\SubscriptionRequest;
+use StockAlert\PriceDrop\UnsubscribeTokenSigner;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,6 +33,7 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Model\Country;
 use Thelia\Model\Currency;
 use Thelia\Model\ProductSaleElementsQuery;
+use Thelia\Tools\URL;
 
 /**
  * The subscription form for one sale element. It lives inside the product
@@ -62,9 +64,14 @@ class PriceDropAlert extends AbstractController
     #[LiveProp]
     public ?string $error = null;
 
+    #[LiveProp]
+    public ?string $unsubscribeUrl = null;
+
     public function __construct(
         private readonly FormServiceInterface $formService,
         private readonly PriceDropSubscriptionService $subscriptionService,
+        private readonly UnsubscribeTokenSigner $unsubscribeTokenSigner,
+        private readonly URL $url,
         private readonly RequestStack $requestStack,
     ) {
     }
@@ -96,7 +103,7 @@ class PriceDropAlert extends AbstractController
         $customer = $session->getCustomerUser();
 
         try {
-            $untaxedReference = $this->subscriptionService->subscribe(new SubscriptionRequest(
+            $outcome = $this->subscriptionService->subscribe(new SubscriptionRequest(
                 $this->pseId,
                 (string) $this->getForm()->get('email')->getData(),
                 $session->getLang()->getLocale(),
@@ -109,7 +116,10 @@ class PriceDropAlert extends AbstractController
             return;
         }
 
-        $this->recordedTaxedPrice = $this->taxedReference($untaxedReference, $session->getCurrency());
+        $this->recordedTaxedPrice = $this->taxedReference($outcome->untaxedReferencePrice, $session->getCurrency());
+        $this->unsubscribeUrl = $this->url->absoluteUrl(
+            '/module/stockalert/price-drop/unsubscribe/'.$this->unsubscribeTokenSigner->sign($outcome->priceDropAlertId, $outcome->expiresAt),
+        );
         $this->subscribed = true;
         $this->resetForm();
     }

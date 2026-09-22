@@ -116,16 +116,10 @@ class PriceDropAlertBackOfficeController extends BaseAdminController
      * A queued one is still a subscription — its email is written but not sent
      * yet — so it is counted in the total and again in its own column.
      */
-    public static function pendingSubscriptions(): PriceDropAlertQuery
-    {
-        return PriceDropAlertQuery::create()
-            ->filterByStatus([PriceDropAlert::STATUS_ACTIVE, PriceDropAlert::STATUS_QUEUED], Criteria::IN)
-            ->filterByExpiresAt(['min' => new \DateTimeImmutable()]);
-    }
 
     private static function countFollowedProducts(): int
     {
-        $productIds = self::pendingSubscriptions()
+        $productIds = PriceDropAlertQuery::create()->pending()
             ->joinProductSaleElements()
             ->withColumn(ProductSaleElementsTableMap::COL_PRODUCT_ID, 'product_id')
             ->groupBy(ProductSaleElementsTableMap::COL_PRODUCT_ID)
@@ -140,7 +134,7 @@ class PriceDropAlertBackOfficeController extends BaseAdminController
      */
     private static function findFollowedProducts(int $page, string $locale): array
     {
-        $groups = self::pendingSubscriptions()
+        $groups = PriceDropAlertQuery::create()->pending()
             ->joinProductSaleElements()
             ->withColumn(ProductSaleElementsTableMap::COL_PRODUCT_ID, 'product_id')
             ->withColumn('COUNT('.PriceDropAlertTableMap::COL_ID.')', 'subscription_count')

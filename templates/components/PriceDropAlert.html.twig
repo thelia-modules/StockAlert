@@ -6,6 +6,12 @@
             withIcon
             text="{{ 'Noted. We will email you if this variant drops below %price%.'|trans({'%price%': recordedTaxedPrice|format_currency(currency_code|default('EUR'), locale: lang_code)}, 'stockalert.fo.default') }}"
         />
+        {% if unsubscribeUrl %}
+            <p class="paragraph-4 text-grey">
+                {{ 'Changed your mind?'|trans({}, 'stockalert.fo.default') }}
+                <twig:Molecules:Link:Base href="{{ unsubscribeUrl }}" customText="{{ 'Cancel this alert'|trans({}, 'stockalert.fo.default') }}" size="small" />
+            </p>
+        {% endif %}
     {% else %}
         <p class="paragraph-3">
             {{ 'Tell me if the price drops'|trans({}, 'stockalert.fo.default') }}

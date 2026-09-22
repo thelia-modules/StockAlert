@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 namespace StockAlert\Hook;
 
+use StockAlert\Model\PriceDropAlertQuery;
 use StockAlert\Controller\PriceDropAlertBackOfficeController;
 use StockAlert\Form\PriceDropAlertConfig;
 use StockAlert\Form\StockAlertConfig;
@@ -102,7 +103,7 @@ class StockAlertHook extends BaseHook
                     'price_drop_list_url' => URL::getInstance()->absoluteUrl('/admin/modules/StockAlert/price-drop'),
                     // Same definition of a pending subscription as the follow-up
                     // screen, so the badge and the list can never disagree.
-                    'price_drop_subscription_count' => PriceDropAlertBackOfficeController::pendingSubscriptions()->count(),
+                    'price_drop_subscription_count' => PriceDropAlertQuery::create()->pending()->count(),
                 ]
             )
         );

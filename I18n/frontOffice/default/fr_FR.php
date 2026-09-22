@@ -19,4 +19,9 @@ return array(
     'Please enter a valid email address.' => 'Saisissez une adresse email valide.',
     'Something went wrong. Please try again later.' => 'Une erreur est survenue. Réessayez plus tard.',
     'I would like to receive the newsletter or the latest news.' => 'Je souhaite recevoir la lettre d\'information et les nouveautés.',
+    'Changed your mind?' => 'Vous changez d\'avis ?',
+    'Cancel this alert' => 'Annuler cette alerte',
+    'Price alert cancelled' => 'Alerte de prix annulée',
+    'You will not receive an email for this product. You can subscribe again from its page at any time.' => 'Vous ne recevrez pas de courriel pour ce produit. Vous pouvez vous réinscrire depuis sa fiche à tout moment.',
+    'Back to the shop' => 'Retour à la boutique',
 );
