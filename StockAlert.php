@@ -24,6 +24,7 @@ namespace StockAlert;
 use Propel\Runtime\Connection\ConnectionInterface;
 use StockAlert\DependencyInjection\Compiler\PublicServicesForTestsPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
 use Thelia\Core\Install\Database;
@@ -278,6 +279,29 @@ class StockAlert extends BaseModule
     public static function getCompilers(): array
     {
         return [[new PublicServicesForTestsPass(), PassConfig::TYPE_BEFORE_REMOVING]];
+    }
+
+    /**
+     * The price drop form mails an address the visitor typed, so it gets its own
+     * budgets rather than sharing the core's password-reset ones: a visitor who
+     * follows a few products must still be able to ask for a new password.
+     */
+    public static function loadConfiguration(ContainerBuilder $container): void
+    {
+        $container->loadFromExtension('framework', [
+            'rate_limiter' => [
+                'stockalert_price_drop_per_address' => [
+                    'policy' => 'sliding_window',
+                    'limit' => 5,
+                    'interval' => '1 hour',
+                ],
+                'stockalert_price_drop_per_client' => [
+                    'policy' => 'sliding_window',
+                    'limit' => 30,
+                    'interval' => '1 hour',
+                ],
+            ],
+        ]);
     }
 
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
