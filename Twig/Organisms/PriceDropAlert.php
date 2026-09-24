@@ -31,7 +31,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Core\Translation\Translator;
-use Thelia\Model\Country;
+use Thelia\Domain\Taxation\TaxEngine\TaxEngine;
 use Thelia\Model\Currency;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Tools\URL;
@@ -72,6 +72,7 @@ class PriceDropAlert extends AbstractController
         private readonly PriceDropSubscriptionService $subscriptionService,
         private readonly UnsubscribeTokenSigner $unsubscribeTokenSigner,
         private readonly URL $url,
+        private readonly TaxEngine $taxEngine,
         private readonly RequestStack $requestStack,
     ) {
     }
@@ -158,7 +159,8 @@ class PriceDropAlert extends AbstractController
 
         $productSaleElements->setVirtualColumn('price_PRICE', $untaxedReference);
 
-        return round($productSaleElements->getTaxedPrice(Country::getShopLocation()), 2);
+        // Same country as the price the page shows: the visitor's delivery country.
+        return round($productSaleElements->getTaxedPrice($this->taxEngine->getDeliveryCountry()), 2);
     }
 
     private function refusalMessage(SubscriptionRefusal $refusal): string

@@ -141,10 +141,10 @@ final readonly class PriceDropQueueProcessor
     {
         $locale = $alert->getLocale() ?? 'en_US';
         $product = $productSaleElements->getProduct();
-        $shopCountry = Country::getShopLocation();
 
         $referencePrice = (float) $alert->getReferencePrice();
         $newPrice = (float) $alert->getNewPrice();
+        $taxCountry = $this->taxCountryOf($alert);
 
         return [
             'locale' => $locale,
@@ -157,8 +157,8 @@ final readonly class PriceDropQueueProcessor
             'currency_symbol' => $currency->getSymbol(),
             'old_untaxed_price' => $referencePrice,
             'new_untaxed_price' => $newPrice,
-            'old_price' => $this->taxed($productSaleElements, $referencePrice, $shopCountry),
-            'new_price' => $this->taxed($productSaleElements, $newPrice, $shopCountry),
+            'old_price' => $this->taxed($productSaleElements, $referencePrice, $taxCountry),
+            'new_price' => $this->taxed($productSaleElements, $newPrice, $taxCountry),
         ];
     }
 
@@ -176,6 +176,19 @@ final readonly class PriceDropQueueProcessor
         }
 
         return (string) $product->getRef();
+    }
+
+    /**
+     * The country the shop taxed the price with when the subscriber looked at it: the
+     * delivery country of their account when they have one, else the shop's default
+     * country, which is what the product page uses for a visitor.
+     */
+    private function taxCountryOf(PriceDropAlert $alert): Country
+    {
+        $customer = $alert->getCustomerId() ? $alert->getCustomer() : null;
+        $addressCountry = $customer?->getDefaultAddress()?->getCountry();
+
+        return $addressCountry ?? Country::getDefaultCountry();
     }
 
     private function taxed(ProductSaleElements $productSaleElements, float $untaxedPrice, Country $country): float
