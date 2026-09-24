@@ -151,7 +151,7 @@ final readonly class PriceDropQueueProcessor
             'product_id' => $product->getId(),
             'pse_id' => $productSaleElements->getId(),
             'product_title' => $this->productTitle($product, $locale),
-            'product_url' => $this->productUrl($product->getId(), $locale),
+            'product_url' => $this->productUrl($product->getId(), $locale, (string) $productSaleElements->getRef()),
             'currency_id' => $currency->getId(),
             'currency_code' => $currency->getCode(),
             'currency_symbol' => $currency->getSymbol(),
@@ -186,12 +186,22 @@ final readonly class PriceDropQueueProcessor
         return round($productSaleElements->getTaxedPrice($country), 2);
     }
 
-    private function productUrl(int $productId, string $locale): string
+    /**
+     * The product page, with the followed variant preselected: the theme reads `?ref`
+     * to open the page on a precise sale element rather than on the default one.
+     */
+    private function productUrl(int $productId, string $locale, string $productSaleElementsRef): string
     {
         try {
-            return $this->url->retrieve('product', $productId, $locale)->toString();
+            $url = $this->url->retrieve('product', $productId, $locale)->toString();
         } catch (\Throwable) {
-            return $this->url->absoluteUrl('/product/'.$productId);
+            $url = $this->url->absoluteUrl('/product/'.$productId);
         }
+
+        if ('' === $productSaleElementsRef) {
+            return $url;
+        }
+
+        return $url.(str_contains($url, '?') ? '&' : '?').'ref='.rawurlencode($productSaleElementsRef);
     }
 }

@@ -62,6 +62,7 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
         self::assertGreaterThanOrEqual(32.0, $message['parameters']['new_price']);
         self::assertLessThan($message['parameters']['old_price'], $message['parameters']['new_price']);
         self::assertStringContainsString('http', $message['parameters']['product_url']);
+        self::assertMatchesRegularExpression('/[?&]ref='.preg_quote(rawurlencode((string) $productSaleElements->getRef()), '/').'$/', $message['parameters']['product_url'], 'the link opens the page on the followed variant');
         self::assertSame($this->currency->getId(), $message['parameters']['currency_id']);
 
         self::assertNull(PriceDropAlertQuery::create()->findPk($alert->getId()));
