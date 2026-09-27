@@ -63,3 +63,23 @@
 		{% endif %}
 	</div>
 </div>
+
+
+<div class="mb-3 card" data-testid="stockalert-price-drop-card">
+	<div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+		<h3 class="mb-0 card-title">{{ 'Price drop alert'|trans({}, 'stockalert.bo.default') }}</h3>
+		<a class="btn btn-outline-secondary btn-sm" href="{{ price_drop_list_url }}" data-testid="stockalert-price-drop-link">
+			{{ 'Followed products'|trans({}, 'stockalert.bo.default') }}
+			<span class="badge bg-secondary">{{ price_drop_subscription_count }}</span>
+		</a>
+	</div>
+	<div class="card-body">
+		<p class="text-muted">{{ 'A visitor can ask to be warned when the price of a product drops. Subscriptions are listed by product, without the email addresses.'|trans({}, 'stockalert.bo.default') }}</p>
+		{% form_theme price_drop_form with bo_form_themes only %}
+		{{ form_start(price_drop_form, {'action': path('stockalert.price_drop.save')}) }}
+		{{ form_errors(price_drop_form) }}
+		{{ form_rest(price_drop_form) }}
+		<button type="submit" id="stockalert-price-drop-save" class="btn btn-primary">{{ 'Save'|trans({}, 'stockalert.bo.default') }}</button>
+		{{ form_end(price_drop_form) }}
+	</div>
+</div>

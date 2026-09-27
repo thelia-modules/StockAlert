@@ -1,0 +1,20 @@
+{% extends "email-layout.html.twig" %}
+
+{% block browser %}{% endblock %}
+{% block image_header %}{% endblock %}
+{% block pre_header %}{% endblock %}
+
+{% block email_subject %}{{ 'The price of %product% has dropped'|trans({'%product%': product_title}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_title %}{{ 'Good news: the price has dropped'|trans({}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_content %}
+    {{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'You asked us to tell you when the price of %product% goes down. It just did.'|trans({'%product%': product_title}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'Price when you subscribed:'|trans({}, 'stockalert.email.default', locale) }} <s>{{ format_money(old_price, currency_id, locale) }}</s><br />
+    <strong>{{ 'Price today:'|trans({}, 'stockalert.email.default', locale) }} {{ format_money(new_price, currency_id, locale) }}</strong><br /><br />
+    <a href="{{ product_url }}">{{ 'See the product'|trans({}, 'stockalert.email.default', locale) }}</a><br /><br />
+    {{ 'This alert is sent once: subscribe again on the product page to follow the next drop.'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }},<br />
+    {{ 'The %store% team.'|trans({'%store%': config('store_name')}, 'stockalert.email.default', locale) }}
+{% endblock %}

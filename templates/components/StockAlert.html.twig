@@ -1,39 +1,27 @@
-<div {{ attributes }}>
-	<button class="self-start mb-4 Button Button--large open-modal" type="button" data-action="live#action" data-live-action-param="openModal">
-		{{'Alert me'|trans}}
-		<span class="icon icon-right">
-			{{ ux_icon('bell') }}
-		</span>
-	</button>
+{% form_theme form with flexy_form_themes only %}
+<div {{ attributes.defaults({class: 'StockAlert flex flex-col gap-3'}) }}>
+    {% if success %}
+        <twig:Molecules:SnackBar:Base variant="success" withIcon text="{{ message }}" />
+    {% else %}
+        <p class="paragraph-3">{{ 'Tell me when it is back in stock'|trans({}, 'stockalert.fo.default') }}</p>
 
-	{% set stockAlertContent %}
+        {% if message %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ message }}" />
+        {% endif %}
 
-	<legend class="h4">{{'Register your email to be notified when it will be available again.'|trans}}</legend>
-	{% if message and success %}
-		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: message, variant: 'validated', withIcon:true, size: "full my-8"} %}
-		<button type="button" class="mx-auto Button Button--primary" data-action="modal#close">
-			{{ 'Back to product'|trans }}
-		</button>
-
-	{% else %}
-		{{form_start(form,{
-		attr : {
-			class: 'flex flex-col items-stretch gap-4 mt-4',
-			'data-action': 'live#action:prevent',
-			'data-live-action-param': 'save'
-			}
-		})}}
-
-
-		<input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ field_value(form.product_sale_elements_id) }}">
-		{{form_rest(form)}}
-		{{ component('Flexy:Button', {text: 'Confirm'|trans, size: 'large', type: 'submit', class: 'self-center'}) }}
-		{{form_end(form)}}
-	{% endif %}
-	{% endset %}
-
-	{% include '@components/Molecules/Modal/Modal.html.twig' with {
-		name: 'stockAlert',
-		content: stockAlertContent
-	} %}
+        {{ form_start(form, {attr: {
+            class: 'flex flex-col gap-3',
+            'data-action': 'live#action:prevent',
+            'data-live-action-param': 'save',
+            novalidate: 'novalidate',
+        }}) }}
+            {# The sale element travels as a plain hidden input: the form theme would otherwise
+               render the id type as a labelled field. #}
+            <input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ pseId }}">
+            {% do form.product_sale_elements_id.setRendered %}
+            {{ form_row(form.email, {label: 'Email address'|trans({}, 'stockalert.fo.default')}) }}
+            {{ form_row(form.newsletter, {label: 'I would like to receive the newsletter or the latest news.'|trans({}, 'stockalert.fo.default')}) }}
+            <twig:Molecules:Button:Base type="submit" text="{{ 'Alert me'|trans({}, 'stockalert.fo.default') }}" icon_left="bell" color="secondary" class="self-start" />
+        {{ form_end(form) }}
+    {% endif %}
 </div>

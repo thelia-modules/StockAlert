@@ -26,4 +26,13 @@ return [
     'You will recieve a notification when the quantity in stock is lower or equal to this value.' => 'You will recieve a notification when the quantity in stock is lower or equal to this value.',
     'Your request has been taken into account' => 'Your request has been taken into account',
     'Got it! You’ll receive an email as soon as the product is back in stock.' => 'C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.',
+    'Price drop alert enabled' => 'Price drop alert enabled',
+    'Price drop threshold (%)' => 'Price drop threshold (%)',
+    'A subscriber is notified only when the new price is lower than the price seen by at least this percentage.' => 'A subscriber is notified only when the new price is lower than the price seen by at least this percentage.',
+    'Subscription lifetime (days)' => 'Subscription lifetime (days)',
+    'A subscription that never saw a price drop is dropped after this many days.' => 'A subscription that never saw a price drop is dropped after this many days.',
+    'Maximum subscriptions per email address' => 'Maximum subscriptions per email address',
+    'A visitor who reached this number of subscriptions cannot add another one.' => 'A visitor who reached this number of subscriptions cannot add another one.',
+    'Alerts sent per run' => 'Alerts sent per run',
+    'Number of pending alerts the scheduled command sends on each run.' => 'Number of pending alerts the scheduled command sends on each run.',
 ];

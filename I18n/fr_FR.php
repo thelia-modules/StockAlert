@@ -25,4 +25,13 @@ return [
     'You have already subscribed to this product' => 'Vous avez déjà souscrit à ce produit',
     'You will recieve a notification when the quantity in stock is lower or equal to this value.' => 'Vous recevrez une notification quand la quantité en stock sera inférieure ou égale à cette valeur.',
     'Your request has been taken into account' => 'Votre demande a été prise en compte',
+    'Price drop alert enabled' => 'Activer l\'alerte de baisse de prix',
+    'Price drop threshold (%)' => 'Seuil de baisse de prix (%)',
+    'A subscriber is notified only when the new price is lower than the price seen by at least this percentage.' => 'Un inscrit n\'est prévenu que si le nouveau prix est inférieur d\'au moins ce pourcentage au prix qu\'il a vu.',
+    'Subscription lifetime (days)' => 'Durée de vie d\'une inscription (jours)',
+    'A subscription that never saw a price drop is dropped after this many days.' => 'Une inscription qui n\'a jamais vu de baisse est supprimée au bout de ce nombre de jours.',
+    'Maximum subscriptions per email address' => 'Nombre maximum d\'inscriptions par adresse email',
+    'A visitor who reached this number of subscriptions cannot add another one.' => 'Un visiteur qui a atteint ce nombre d\'inscriptions ne peut plus en ajouter.',
+    'Alerts sent per run' => 'Alertes envoyées par passage',
+    'Number of pending alerts the scheduled command sends on each run.' => 'Nombre d\'alertes en attente que la commande planifiée envoie à chaque passage.',
 ];

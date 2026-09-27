@@ -17,6 +17,54 @@
 
     </table>
 
+    <table name="price_drop_alert" namespace="StockAlert\Model">
+
+        <column name="id" primaryKey="true" autoIncrement="true" required="true" type="INTEGER" />
+        <column name="product_sale_elements_id" required="true" type="INTEGER" />
+        <column name="customer_id" required="false" type="INTEGER" />
+        <column name="email" required="true" size="255" type="VARCHAR" />
+        <column name="locale" size="45" type="VARCHAR" />
+        <column name="currency_id" required="true" type="INTEGER" />
+        <column name="reference_price" required="true" scale="6" size="16" type="DECIMAL" />
+        <column name="new_price" required="false" scale="6" size="16" type="DECIMAL" />
+        <column name="status" defaultValue="active" required="true" size="10" type="VARCHAR" />
+        <column name="attempts" defaultValue="0" required="true" type="SMALLINT" />
+        <column name="expires_at" required="true" type="TIMESTAMP" />
+        <column name="queued_at" required="false" type="TIMESTAMP" />
+
+        <foreign-key foreignTable="product_sale_elements" name="fk_price_drop_alert_product_sale_elements_id" onDelete="CASCADE" >
+            <reference foreign="id" local="product_sale_elements_id" />
+        </foreign-key>
+
+        <foreign-key foreignTable="customer" name="fk_price_drop_alert_customer_id" onDelete="CASCADE" >
+            <reference foreign="id" local="customer_id" />
+        </foreign-key>
+
+        <foreign-key foreignTable="currency" name="fk_price_drop_alert_currency_id" onDelete="CASCADE" >
+            <reference foreign="id" local="currency_id" />
+        </foreign-key>
+
+        <unique name="unq_price_drop_alert_pse_email">
+            <unique-column name="product_sale_elements_id" />
+            <unique-column name="email" />
+        </unique>
+
+        <index name="idx_price_drop_alert_email">
+            <index-column name="email" />
+        </index>
+
+        <index name="idx_price_drop_alert_expires_at">
+            <index-column name="expires_at" />
+        </index>
+
+        <index name="idx_price_drop_alert_status">
+            <index-column name="status" />
+        </index>
+
+        <behavior name="timestampable" />
+
+    </table>
+
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />
 
 </database>

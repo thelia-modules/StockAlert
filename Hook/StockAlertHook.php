@@ -21,7 +21,9 @@ declare(strict_types=1);
 
 namespace StockAlert\Hook;
 
+use StockAlert\Form\PriceDropAlertConfig;
 use StockAlert\Form\StockAlertConfig;
+use StockAlert\Model\PriceDropAlertQuery;
 use StockAlert\Model\RestockingAlertQuery;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;
@@ -31,6 +33,7 @@ use Thelia\Core\Template\Parser\ParserResolver;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
+use Thelia\Tools\URL;
 
 /**
  * Class StockAlertHook.
@@ -86,6 +89,8 @@ class StockAlertHook extends BaseHook
     public function onModuleConfiguration(HookRenderEvent $event): void
     {
         $form = $this->formFactory->createForm(StockAlertConfig::getName());
+        $priceDropForm = $this->formFactory->createForm(PriceDropAlertConfig::getName());
+
         $event->add(
             $this->render(
                 'StockAlert/configuration.html.twig',
@@ -93,6 +98,11 @@ class StockAlertHook extends BaseHook
                     'form' => $form->createView()->getView(),
                     'stock_check_enabled' => '1' === ConfigQuery::read('check-available-stock'),
                     'subscriptions' => $this->getSubscriptions(),
+                    'price_drop_form' => $priceDropForm->createView()->getView(),
+                    'price_drop_list_url' => URL::getInstance()->absoluteUrl('/admin/modules/StockAlert/price-drop'),
+                    // Same definition of a pending subscription as the follow-up
+                    // screen, so the badge and the list can never disagree.
+                    'price_drop_subscription_count' => PriceDropAlertQuery::create()->pending()->count(),
                 ]
             )
         );
@@ -135,6 +145,7 @@ class StockAlertHook extends BaseHook
                 'productTitle' => $productTitle,
             ];
         }
+
         return $subscriptions;
     }
 }

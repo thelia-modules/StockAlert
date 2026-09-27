@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container-l pt-10 pb-15 flex flex-col gap-4">
+        <h1 class="h3">{{ 'Price alert cancelled'|trans({}, 'stockalert.fo.default') }}</h1>
+        <p class="paragraph-3">{{ 'You will not receive an email for this product. You can subscribe again from its page at any time.'|trans({}, 'stockalert.fo.default') }}</p>
+        <twig:Molecules:Link:Base href="{{ thelia_url('/') }}" customText="{{ 'Back to the shop'|trans({}, 'stockalert.fo.default') }}" />
+    </div>
+{% endblock %}

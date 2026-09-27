@@ -1,0 +1,60 @@
+{% extends '@BackOfficeDefaultTwig/base.html.twig' %}
+
+{% block title %}{{ 'Price drop alert follow-up'|trans({}, 'stockalert.bo.default') }}{% endblock %}
+
+{% block breadcrumb %}
+	<nav aria-label="breadcrumb" class="mb-1">
+		<ol class="breadcrumb mb-0">
+			<li class="breadcrumb-item"><a href="{{ path('admin.home') }}">{{ 'Home'|trans }}</a></li>
+			<li class="breadcrumb-item"><a href="{{ path('admin.module.configure', {'module_code': 'StockAlert'}) }}">{{ 'Stock alert'|trans({}, 'stockalert.bo.default') }}</a></li>
+			<li class="breadcrumb-item active" aria-current="page">{{ 'Price drop alert follow-up'|trans({}, 'stockalert.bo.default') }}</li>
+		</ol>
+	</nav>
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid" data-testid="stockalert-price-drop-page">
+		{% embed '@BackOfficeDefaultTwig/_page_header.html.twig' with { title: 'Price drop alert follow-up'|trans({}, 'stockalert.bo.default') } %}
+			{% block title %}
+				{{ 'Price drop alert follow-up'|trans({}, 'stockalert.bo.default') }}
+				<span class="badge bg-secondary" data-testid="stockalert-price-drop-count">{{ total }}</span>
+			{% endblock %}
+			{% block actions %}
+				<a class="btn btn-outline-secondary btn-sm" href="{{ path('admin.module.configure', {'module_code': 'StockAlert'}) }}">
+					{{ 'Back to the module configuration'|trans({}, 'stockalert.bo.default') }}
+				</a>
+			{% endblock %}
+		{% endembed %}
+
+		<p class="text-muted">{{ 'Subscribers are counted, never named: the module mails them itself.'|trans({}, 'stockalert.bo.default') }}</p>
+
+		{# The link is built here rather than in the controller so the route owns the
+		   URL and Twig owns the escaping. #}
+		{% set table_rows = [] %}
+		{% for row in rows %}
+			{% set table_rows = table_rows|merge([row|merge({
+				'product_html': '<a href="' ~ path('admin.products.update', {'product_id': row.product_id}) ~ '">' ~ row.product_title|e ~ '</a>'
+			})]) %}
+		{% endfor %}
+
+		{{ component('BoDataTable', {
+			id: 'stockalert-price-drop',
+			columns: [
+				column_html('product_html', 'Product'|trans({}, 'stockalert.bo.default')),
+				column_text('ref', 'Reference'|trans({}, 'stockalert.bo.default')),
+				column_text('subscriptions', 'Subscriptions'|trans({}, 'stockalert.bo.default'), 'center'),
+				column_text('queued', 'Waiting to be sent'|trans({}, 'stockalert.bo.default'), 'center'),
+			],
+			rows: table_rows,
+			emptyMessage: 'No product is being followed for a price drop.'|trans({}, 'stockalert.bo.default'),
+		}) }}
+
+		{{ component('BoPagination', {
+			route: 'stockalert.price_drop.list',
+			currentPage: current_page,
+			lastPage: pages,
+			ariaLabel: 'Price drop alert pagination'|trans({}, 'stockalert.bo.default'),
+			testid: 'stockalert-price-drop-pagination',
+		}) }}
+	</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% form_theme form with flexy_form_themes only %}
+<div {{ attributes.defaults({class: 'PriceDropAlert flex flex-col gap-3'}) }}>
+    {% if subscribed %}
+        <twig:Molecules:SnackBar:Base
+            variant="success"
+            withIcon
+            text="{{ 'Noted. We will email you if this variant drops below %price%.'|trans({'%price%': recordedTaxedPrice|format_currency(currency_code|default('EUR'), locale: lang_code)}, 'stockalert.fo.default') }}"
+        />
+        {% if unsubscribeUrl %}
+            <p class="paragraph-4 text-grey">
+                {{ 'Changed your mind?'|trans({}, 'stockalert.fo.default') }}
+                <twig:Molecules:Link:Base href="{{ unsubscribeUrl }}" customText="{{ 'Cancel this alert'|trans({}, 'stockalert.fo.default') }}" size="small" />
+            </p>
+        {% endif %}
+    {% else %}
+        <p class="paragraph-3">
+            {{ 'Tell me if the price drops'|trans({}, 'stockalert.fo.default') }}
+            {% if taxedPrice is not null %}
+                <span class="text-grey">({{ 'currently %price%'|trans({'%price%': taxedPrice|format_currency(currency_code|default('EUR'), locale: lang_code)}, 'stockalert.fo.default') }})</span>
+            {% endif %}
+        </p>
+
+        {% if error %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ error }}" />
+        {% endif %}
+
+        {# A plain column: the theme's stylesheet only carries the utilities its own templates
+           use, so a module block sticks to those and does not depend on responsive variants. #}
+        {{ form_start(form, {attr: {
+            class: 'flex flex-col gap-3',
+            'data-action': 'live#action:prevent',
+            'data-live-action-param': 'save',
+            novalidate: 'novalidate',
+        }}) }}
+            {{ form_row(form.email, {label: 'Email address'|trans({}, 'stockalert.fo.default')}) }}
+            <twig:Molecules:Button:Base type="submit" text="{{ 'Alert me'|trans({}, 'stockalert.fo.default') }}" icon_left="bell" color="secondary" class="self-start" />
+        {{ form_end(form) }}
+    {% endif %}
+</div>
