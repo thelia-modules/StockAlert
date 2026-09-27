@@ -61,19 +61,32 @@ final readonly class EffectivePriceResolver
 
         /** @var ProductSaleElements $productSaleElements */
         foreach (ProductSaleElementsQuery::create()->filterById($missing, Criteria::IN)->find() as $productSaleElements) {
-            try {
-                $catalogPrices = $productSaleElements->getPricesByCurrency($currency);
-            } catch (\RuntimeException) {
-                // No price at all in the default currency: nothing to compare against.
-                continue;
-            }
+            $catalogPrice = self::catalogColumnPrice($productSaleElements, $currency);
 
-            $prices[$productSaleElements->getId()] = $productSaleElements->getPromo()
-                ? $catalogPrices->getPromoPrice()
-                : $catalogPrices->getPrice();
+            if (null !== $catalogPrice) {
+                $prices[$productSaleElements->getId()] = $catalogPrice;
+            }
         }
 
         return $prices;
+    }
+
+    /**
+     * The catalog columns alone, promo price when the sale element is on promotion:
+     * what a sale element costs when nothing else prices it.
+     */
+    public static function catalogColumnPrice(ProductSaleElements $productSaleElements, Currency $currency): ?float
+    {
+        try {
+            $catalogPrices = $productSaleElements->getPricesByCurrency($currency);
+        } catch (\RuntimeException) {
+            // No price at all in the default currency: nothing to compare against.
+            return null;
+        }
+
+        return $productSaleElements->getPromo()
+            ? $catalogPrices->getPromoPrice()
+            : $catalogPrices->getPrice();
     }
 
     public function resolveOne(int $productSaleElementsId, Currency $currency, ?Customer $customer = null): ?float

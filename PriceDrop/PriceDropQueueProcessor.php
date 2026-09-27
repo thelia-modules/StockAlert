@@ -32,16 +32,27 @@ use Thelia\Tools\URL;
 /**
  * Sends the emails the detector queued, a bounded batch at a time, from the
  * cron command: never from the request that changed a price.
+ *
+ * A queued drop is what the detector saw when the price changed. The price may
+ * have moved again since (a sale closed, a typo fixed): the email announces what
+ * the shop charges when it leaves, and it does not leave at all when the drop is
+ * gone, in which case the subscription goes back to waiting.
  */
 final readonly class PriceDropQueueProcessor
 {
     /** After this many failed sends the subscription is dropped: the address is most likely dead. */
     public const MAX_ATTEMPTS = 3;
 
+    /**
+     * Without the resolver, only the catalog columns are read to confirm a drop: the
+     * same fallback the resolver itself uses for a sale element nothing else prices.
+     */
     public function __construct(
         private MailerFactory $mailer,
         private URL $url,
         private LoggerInterface $logger,
+        private ?EffectivePriceResolver $effectivePriceResolver = null,
+        private PriceDropConfig $config = new PriceDropConfig(),
     ) {
     }
 
@@ -101,6 +112,16 @@ final readonly class PriceDropQueueProcessor
         $productSaleElements = $alert->getProductSaleElements();
         $currency = $alert->getCurrency();
 
+        $currentPrice = $this->currentPrice($alert, $productSaleElements, $currency);
+
+        if (null === $currentPrice || !EffectivePriceResolver::isSignificantDrop((float) $alert->getReferencePrice(), $currentPrice, $this->config->thresholdPercent())) {
+            $this->putBackToWaiting($alert);
+
+            return false;
+        }
+
+        $alert->setNewPrice(PriceDropSubscriptionService::decimal($currentPrice));
+
         try {
             $this->mailer->sendEmailMessageOrFail(
                 StockAlert::MESSAGE_PRICE_DROP,
@@ -132,6 +153,36 @@ final readonly class PriceDropQueueProcessor
         $alert->delete();
 
         return true;
+    }
+
+    /**
+     * The untaxed price the subscriber pays right now, priced like the detector
+     * priced it: for their account when the subscription has one.
+     */
+    private function currentPrice(PriceDropAlert $alert, ProductSaleElements $productSaleElements, Currency $currency): ?float
+    {
+        if (null === $this->effectivePriceResolver) {
+            return EffectivePriceResolver::catalogColumnPrice($productSaleElements, $currency);
+        }
+
+        $customer = $alert->getCustomerId() ? $alert->getCustomer() : null;
+
+        return $this->effectivePriceResolver->resolveOne($productSaleElements->getId(), $currency, $customer);
+    }
+
+    /**
+     * The drop the detector saw is gone: the subscription waits for the next one,
+     * as if nothing had been queued.
+     *
+     * @throws PropelException
+     */
+    private function putBackToWaiting(PriceDropAlert $alert): void
+    {
+        $alert
+            ->setStatus(PriceDropAlert::STATUS_ACTIVE)
+            ->setNewPrice(null)
+            ->setQueuedAt(null)
+            ->save();
     }
 
     /**

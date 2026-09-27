@@ -17,6 +17,7 @@ namespace StockAlert\Tests\Integration\PriceDrop;
 use Psr\Log\NullLogger;
 use StockAlert\Model\PriceDropAlert;
 use StockAlert\Model\PriceDropAlertQuery;
+use StockAlert\PriceDrop\EffectivePriceResolver;
 use StockAlert\PriceDrop\PriceDropQueueProcessor;
 use StockAlert\PriceDrop\PriceDropSubscriptionService;
 use StockAlert\StockAlert;
@@ -40,13 +41,14 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
             $this->getService(ParserResolver::class),
             $this->getService(MailerInterface::class),
         );
-        $this->processor = new PriceDropQueueProcessor($this->mailer, $this->getService(URL::class), new NullLogger());
+        $this->processor = new PriceDropQueueProcessor($this->mailer, $this->getService(URL::class), new NullLogger(), $this->getService(EffectivePriceResolver::class));
     }
 
     public function testAQueuedAlertIsMailedWithBothPricesThenConsumed(): void
     {
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
         $alert = $this->queuedAlert($productSaleElements, 'happy@example.com', 40.0, 32.0);
+        $this->repriceDefaultCurrency($productSaleElements, 32.0);
 
         self::assertSame(1, $this->processor->drain(10));
 
@@ -71,6 +73,7 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
     public function testTheBatchIsBoundedAndTheOldestGoFirst(): void
     {
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $this->repriceDefaultCurrency($productSaleElements, 30.0);
         $this->queuedAlert($productSaleElements, 'first@example.com', 40.0, 30.0, new \DateTimeImmutable('-3 minutes'));
         $this->queuedAlert($productSaleElements, 'second@example.com', 40.0, 30.0, new \DateTimeImmutable('-2 minutes'));
         $third = $this->queuedAlert($productSaleElements, 'third@example.com', 40.0, 30.0, new \DateTimeImmutable('-1 minute'));
@@ -91,7 +94,9 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
 
     public function testAFailedSendIsRetriedThenGivenUp(): void
     {
-        $alert = $this->queuedAlert($this->productPricedAt(40.0)->getDefaultSaleElements(), 'dead@example.com', 40.0, 30.0);
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $this->repriceDefaultCurrency($productSaleElements, 30.0);
+        $alert = $this->queuedAlert($productSaleElements, 'dead@example.com', 40.0, 30.0);
         $this->mailer->failing = true;
 
         self::assertSame(0, $this->processor->drain(10));
@@ -100,6 +105,31 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
         self::assertSame(2, PriceDropAlertQuery::create()->findPk($alert->getId())?->getAttempts());
         self::assertSame(0, $this->processor->drain(10));
         self::assertNull(PriceDropAlertQuery::create()->findPk($alert->getId()));
+    }
+
+    public function testADropUndoneBeforeTheSendPutsTheSubscriptionBackToWaiting(): void
+    {
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $alert = $this->queuedAlert($productSaleElements, 'patient@example.com', 40.0, 32.0);
+
+        self::assertSame(0, $this->processor->drain(10));
+
+        self::assertSame([], $this->mailer->sent, 'the sale element is back at 40: there is no drop to announce');
+        $row = PriceDropAlertQuery::create()->findPk($alert->getId());
+        self::assertSame(PriceDropAlert::STATUS_ACTIVE, $row?->getStatus());
+        self::assertNull($row?->getNewPrice());
+        self::assertNull($row?->getQueuedAt());
+    }
+
+    public function testTheEmailAnnouncesThePriceChargedWhenItLeaves(): void
+    {
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $this->queuedAlert($productSaleElements, 'lucky@example.com', 40.0, 32.0);
+        $this->repriceDefaultCurrency($productSaleElements, 28.0);
+
+        self::assertSame(1, $this->processor->drain(10));
+
+        self::assertSame(28.0, $this->mailer->sent[0]['parameters']['new_untaxed_price']);
     }
 
     public function testPurgeRemovesTheExpiredSubscriptionsOnly(): void
