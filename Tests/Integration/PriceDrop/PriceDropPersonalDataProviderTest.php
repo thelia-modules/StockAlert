@@ -16,6 +16,9 @@ namespace StockAlert\Tests\Integration\PriceDrop;
 
 use StockAlert\Model\PriceDropAlertQuery;
 use StockAlert\PriceDrop\PriceDropPersonalDataProvider;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Thelia\Core\Event\Customer\CustomerAnonymizeEvent;
+use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Customer\Service\CustomerPersonalDataProviderInterface;
 use Thelia\Model\Customer;
 use Thelia\Model\CustomerTitleQuery;
@@ -65,6 +68,20 @@ final class PriceDropPersonalDataProviderTest extends PriceDropTestCase
         self::assertNull(PriceDropAlertQuery::create()->findPk($mine->getId()));
         self::assertNotNull(PriceDropAlertQuery::create()->findPk($stranger->getId()));
         self::assertSame([], $this->provider->exportPersonalData($customer));
+    }
+
+    public function testTheCoreAnonymizationRemovesTheAlertsMadeWithTheAccountAddress(): void
+    {
+        $customer = $this->customer();
+        $byAddress = $this->activeAlert($this->productPricedAt(40.0)->getDefaultSaleElements(), $customer->getEmail(), 40.0);
+        $byAccount = $this->activeAlert($this->productPricedAt(40.0)->getDefaultSaleElements(), $this->uniqueEmail('other-address'), 40.0, ['customerId' => $customer->getId()]);
+        $stranger = $this->activeAlert($this->productPricedAt(40.0)->getDefaultSaleElements(), $this->uniqueEmail('stranger'), 40.0);
+
+        $this->getService(EventDispatcherInterface::class)->dispatch(new CustomerAnonymizeEvent($customer), TheliaEvents::CUSTOMER_ANONYMIZE);
+
+        self::assertNull(PriceDropAlertQuery::create()->findPk($byAddress->getId()), 'the core rewrites the address before it calls the providers: the alert must go before that');
+        self::assertNull(PriceDropAlertQuery::create()->findPk($byAccount->getId()));
+        self::assertNotNull(PriceDropAlertQuery::create()->findPk($stranger->getId()));
     }
 
     private function customer(): Customer

@@ -17,6 +17,9 @@ namespace StockAlert\PriceDrop;
 use Propel\Runtime\ActiveQuery\Criteria;
 use StockAlert\Model\PriceDropAlert;
 use StockAlert\Model\PriceDropAlertQuery;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Thelia\Core\Event\Customer\CustomerAnonymizeEvent;
+use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Customer\Service\CustomerPersonalDataProviderInterface;
 use Thelia\Model\Customer;
 
@@ -24,9 +27,29 @@ use Thelia\Model\Customer;
  * A price alert is personal data: an address, a product someone wants, a price
  * they found too high. The rows a customer owns, by account or by address, go
  * into the export and disappear with the anonymization.
+ *
+ * The core rewrites the account email before it hands the customer to the
+ * providers: by then the address branch matches nothing. So the rows are also
+ * removed ahead of the core action, while the customer still carries the
+ * address the visitor typed.
  */
-final readonly class PriceDropPersonalDataProvider implements CustomerPersonalDataProviderInterface
+final readonly class PriceDropPersonalDataProvider implements CustomerPersonalDataProviderInterface, EventSubscriberInterface
 {
+    /** Ahead of the core action (128), which anonymizes the account before it calls the providers. */
+    public const ANONYMIZE_PRIORITY = 256;
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            TheliaEvents::CUSTOMER_ANONYMIZE => ['onCustomerAnonymize', self::ANONYMIZE_PRIORITY],
+        ];
+    }
+
+    public function onCustomerAnonymize(CustomerAnonymizeEvent $event): void
+    {
+        $this->anonymizePersonalData($event->getCustomer());
+    }
+
     public function getPersonalDataSectionName(): string
     {
         return 'stockalert_price_drop_alerts';
