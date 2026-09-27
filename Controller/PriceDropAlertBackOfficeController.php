@@ -16,8 +16,6 @@ namespace StockAlert\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use StockAlert\Form\PriceDropAlertConfig;
-use StockAlert\Model\Map\PriceDropAlertTableMap;
-use StockAlert\Model\PriceDropAlert;
 use StockAlert\Model\PriceDropAlertQuery;
 use StockAlert\StockAlert;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,7 +28,6 @@ use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\ConfigQuery;
-use Thelia\Model\Map\ProductSaleElementsTableMap;
 use Thelia\Model\Product;
 use Thelia\Model\ProductQuery;
 use Thelia\Tools\URL;
@@ -97,11 +94,11 @@ class PriceDropAlertBackOfficeController extends BaseAdminController
 
         $page = max(1, (int) $request->query->get('page', 1));
 
-        $total = self::countFollowedProducts();
+        $total = PriceDropAlertQuery::create()->countFollowedProducts();
         $lastPage = max(1, (int) ceil($total / self::PAGE_SIZE));
         $page = min($page, $lastPage);
 
-        $rows = self::findFollowedProducts($page, $request->getLocale());
+        $rows = self::describe(PriceDropAlertQuery::create()->followedProductsPage($page, self::PAGE_SIZE), $request->getLocale());
 
         return new Response($twig->render(self::LIST_TEMPLATE, [
             'rows' => $rows,
@@ -112,61 +109,24 @@ class PriceDropAlertBackOfficeController extends BaseAdminController
     }
 
     /**
-     * Subscriptions still waiting for a drop: not expired, and not already sent.
-     * A queued one is still a subscription — its email is written but not sent
-     * yet — so it is counted in the total and again in its own column.
-     */
-    private static function countFollowedProducts(): int
-    {
-        $productIds = PriceDropAlertQuery::create()->pending()
-            ->joinProductSaleElements()
-            ->withColumn(ProductSaleElementsTableMap::COL_PRODUCT_ID, 'product_id')
-            ->groupBy(ProductSaleElementsTableMap::COL_PRODUCT_ID)
-            ->select(['product_id'])
-            ->find();
-
-        return \count($productIds);
-    }
-
-    /**
+     * @param list<array{product_id: int, subscription_count: int, queued_count: int}> $groups
+     *
      * @return list<array{product_id: int, product_title: string, ref: string, subscriptions: int, queued: int}>
      */
-    private static function findFollowedProducts(int $page, string $locale): array
+    private static function describe(array $groups, string $locale): array
     {
-        $groups = PriceDropAlertQuery::create()->pending()
-            ->joinProductSaleElements()
-            ->withColumn(ProductSaleElementsTableMap::COL_PRODUCT_ID, 'product_id')
-            ->withColumn('COUNT('.PriceDropAlertTableMap::COL_ID.')', 'subscription_count')
-            ->withColumn(
-                'SUM(CASE WHEN '.PriceDropAlertTableMap::COL_STATUS." = '".PriceDropAlert::STATUS_QUEUED."' THEN 1 ELSE 0 END)",
-                'queued_count',
-            )
-            ->groupBy(ProductSaleElementsTableMap::COL_PRODUCT_ID)
-            ->orderBy('subscription_count', Criteria::DESC)
-            ->offset(($page - 1) * self::PAGE_SIZE)
-            ->limit(self::PAGE_SIZE)
-            ->select(['product_id', 'subscription_count', 'queued_count'])
-            ->find();
-
-        $productIds = [];
-        foreach ($groups as $group) {
-            $productIds[] = (int) $group['product_id'];
-        }
-
-        $products = self::indexProducts($productIds, $locale);
+        $products = self::indexProducts(array_column($groups, 'product_id'), $locale);
 
         $rows = [];
         foreach ($groups as $group) {
-            $productId = (int) $group['product_id'];
-            $product = $products[$productId] ?? null;
+            $product = $products[$group['product_id']] ?? null;
 
             $rows[] = [
-                'product_id' => $productId,
-                'product_title' => self::productTitle($productId, $product),
+                'product_id' => $group['product_id'],
+                'product_title' => self::productTitle($group['product_id'], $product),
                 'ref' => $product?->getRef() ?? '',
-                // MySQL hands COUNT() and SUM() back as strings.
-                'subscriptions' => (int) $group['subscription_count'],
-                'queued' => (int) $group['queued_count'],
+                'subscriptions' => $group['subscription_count'],
+                'queued' => $group['queued_count'],
             ];
         }
 
