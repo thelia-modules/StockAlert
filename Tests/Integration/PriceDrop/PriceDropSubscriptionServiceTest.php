@@ -100,6 +100,22 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         self::assertSame(1, PriceDropAlertQuery::create()->filterByEmail($email)->count());
     }
 
+    public function testSubscribingAgainAfterExpiryRevivesTheRowFromTheCurrentPrice(): void
+    {
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $email = $this->uniqueEmail('back');
+        $expired = $this->activeAlert($productSaleElements, $email, 50.0, ['expiresAt' => new \DateTimeImmutable('-1 day')]);
+
+        $outcome = $this->service->subscribe($this->request($productSaleElements->getId(), $email));
+
+        self::assertSame($expired->getId(), $outcome->priceDropAlertId);
+        self::assertTrue($outcome->ownedByCaller);
+        self::assertSame(40.0, $outcome->untaxedReferencePrice, 'the revived subscription compares against the price the visitor sees now');
+        self::assertGreaterThan(new \DateTimeImmutable(), $outcome->expiresAt);
+        self::assertSame(PriceDropAlert::STATUS_ACTIVE, PriceDropAlertQuery::create()->findPk($expired->getId())?->getStatus());
+        self::assertSame(1, PriceDropAlertQuery::create()->filterByEmail($email)->count());
+    }
+
     public function testOnlyTheFirstSubscriberOfAnAddressOwnsTheSubscription(): void
     {
         $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();

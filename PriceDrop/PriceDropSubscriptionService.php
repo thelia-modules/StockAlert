@@ -72,7 +72,7 @@ final readonly class PriceDropSubscriptionService
             ->filterByEmail($email)
             ->findOne();
 
-        if (null !== $existing) {
+        if (null !== $existing && !self::isExpired($existing)) {
             return self::outcomeOf($existing, null !== $request->customerId && $existing->getCustomerId() === $request->customerId);
         }
 
@@ -93,19 +93,30 @@ final readonly class PriceDropSubscriptionService
             throw new SubscriptionRefusedException(SubscriptionRefusal::UnknownProductSaleElement);
         }
 
-        $alert = (new PriceDropAlert())
+        // An expired row the purge has not removed yet is a dead subscription: the
+        // detector ignores it. Subscribing again revives it from what the visitor sees now.
+        $alert = ($existing ?? new PriceDropAlert())
             ->setProductSaleElementsId($productSaleElements->getId())
             ->setCustomerId($customer?->getId())
             ->setEmail($email)
             ->setLocale($request->locale)
             ->setCurrencyId($currency->getId())
             ->setReferencePrice(self::decimal($referencePrice))
+            ->setNewPrice(null)
+            ->setQueuedAt(null)
             ->setStatus(PriceDropAlert::STATUS_ACTIVE)
             ->setAttempts(0)
             ->setExpiresAt(new \DateTimeImmutable(\sprintf('+%d days', $this->config->expirationDays())));
         $alert->save();
 
         return self::outcomeOf($alert, true);
+    }
+
+    private static function isExpired(PriceDropAlert $alert): bool
+    {
+        $expiresAt = $alert->getExpiresAt();
+
+        return !$expiresAt instanceof \DateTimeInterface || $expiresAt <= new \DateTimeImmutable();
     }
 
     private static function outcomeOf(PriceDropAlert $alert, bool $ownedByCaller): SubscriptionOutcome
