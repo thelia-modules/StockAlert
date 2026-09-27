@@ -19,6 +19,16 @@ use StockAlert\Model\Base\PriceDropAlertQuery as BasePriceDropAlertQuery;
 class PriceDropAlertQuery extends BasePriceDropAlertQuery
 {
     /**
+     * The subscriptions the detector compares: not expired, waiting for a drop.
+     */
+    public function active(): static
+    {
+        return $this
+            ->filterByStatus(PriceDropAlert::STATUS_ACTIVE)
+            ->filterByExpiresAt(new \DateTimeImmutable(), Criteria::GREATER_THAN);
+    }
+
+    /**
      * The subscriptions a shopper is still waiting on: not expired, waiting for
      * a drop or for the email to leave.
      */

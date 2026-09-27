@@ -67,9 +67,7 @@ final readonly class PriceDropDetector
 
     private function activeAlerts(): PriceDropAlertQuery
     {
-        return PriceDropAlertQuery::create()
-            ->filterByStatus(PriceDropAlert::STATUS_ACTIVE)
-            ->filterByExpiresAt(new \DateTimeImmutable(), Criteria::GREATER_THAN);
+        return PriceDropAlertQuery::create()->active();
     }
 
     /**

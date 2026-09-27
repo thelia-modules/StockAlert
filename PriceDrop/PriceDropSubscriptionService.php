@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace StockAlert\PriceDrop;
 
-use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
 use StockAlert\Model\PriceDropAlert;
 use StockAlert\Model\PriceDropAlertQuery;
@@ -76,11 +75,7 @@ final readonly class PriceDropSubscriptionService
             return self::outcomeOf($existing, null !== $request->customerId && $existing->getCustomerId() === $request->customerId);
         }
 
-        $activeCount = PriceDropAlertQuery::create()
-            ->filterByEmail($email)
-            ->filterByStatus(PriceDropAlert::STATUS_ACTIVE)
-            ->filterByExpiresAt(new \DateTimeImmutable(), Criteria::GREATER_THAN)
-            ->count();
+        $activeCount = PriceDropAlertQuery::create()->active()->filterByEmail($email)->count();
 
         if ($activeCount >= $this->config->maxSubscriptionsPerEmail()) {
             throw new SubscriptionRefusedException(SubscriptionRefusal::QuotaExceeded);
