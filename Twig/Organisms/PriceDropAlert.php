@@ -133,9 +133,10 @@ class PriceDropAlert extends AbstractController
         }
 
         $this->recordedTaxedPrice = $this->taxedReference($outcome->untaxedReferencePrice, $session->getCurrency());
-        $this->unsubscribeUrl = $this->url->absoluteUrl(
-            '/module/stockalert/price-drop/unsubscribe/'.$this->unsubscribeTokenSigner->sign($outcome->priceDropAlertId, $outcome->expiresAt),
-        );
+        // The link deletes the subscription: it is handed out only to whoever owns it.
+        $this->unsubscribeUrl = $outcome->ownedByCaller
+            ? $this->url->absoluteUrl('/module/stockalert/price-drop/unsubscribe/'.$this->unsubscribeTokenSigner->sign($outcome->priceDropAlertId, $outcome->expiresAt))
+            : null;
         $this->subscribed = true;
         $this->resetForm();
     }

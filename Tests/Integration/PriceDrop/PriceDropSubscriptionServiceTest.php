@@ -100,6 +100,32 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         self::assertSame(1, PriceDropAlertQuery::create()->filterByEmail($email)->count());
     }
 
+    public function testOnlyTheFirstSubscriberOfAnAddressOwnsTheSubscription(): void
+    {
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $email = $this->uniqueEmail();
+
+        $first = $this->service->subscribe($this->request($productSaleElements->getId(), $email));
+        $second = $this->service->subscribe($this->request($productSaleElements->getId(), $email));
+
+        self::assertTrue($first->ownedByCaller);
+        self::assertFalse($second->ownedByCaller, 'whoever types a known address again must not get a link that deletes the first subscription');
+    }
+
+    public function testACustomerOwnsTheSubscriptionAttachedToItsAccount(): void
+    {
+        $productSaleElements = $this->productPricedAt(40.0)->getDefaultSaleElements();
+        $customer = $this->factory->customer(CustomerTitleQuery::create()->findOne(), ['email' => $this->uniqueEmail('customer')]);
+        $request = new SubscriptionRequest($productSaleElements->getId(), $customer->getEmail(), 'fr_FR', $this->currency->getId(), $customer->getId());
+
+        $this->service->subscribe($request);
+        $again = $this->service->subscribe($request);
+        $guest = $this->service->subscribe($this->request($productSaleElements->getId(), $customer->getEmail()));
+
+        self::assertTrue($again->ownedByCaller);
+        self::assertFalse($guest->ownedByCaller);
+    }
+
     public function testADisabledFeatureRefusesEverySubscription(): void
     {
         $this->writeConfig(StockAlert::CONFIG_PRICE_DROP_ENABLED, '0');

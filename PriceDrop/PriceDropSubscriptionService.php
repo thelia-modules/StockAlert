@@ -34,7 +34,9 @@ final readonly class PriceDropSubscriptionService
     /**
      * Records what the visitor saw. An address already following this sale element
      * is left as it is, with its first reference price: the caller answers the same
-     * way in both cases, so the form never tells whether an address is known.
+     * way in both cases, so the form never tells whether an address is known. Only
+     * the unsubscribe link is withheld then, unless the row is the caller's own
+     * account: a link deletes the row, and anyone can type someone else's address.
      *
      * @throws SubscriptionRefusedException
      * @throws PropelException
@@ -71,7 +73,7 @@ final readonly class PriceDropSubscriptionService
             ->findOne();
 
         if (null !== $existing) {
-            return self::outcomeOf($existing);
+            return self::outcomeOf($existing, null !== $request->customerId && $existing->getCustomerId() === $request->customerId);
         }
 
         $activeCount = PriceDropAlertQuery::create()
@@ -103,12 +105,12 @@ final readonly class PriceDropSubscriptionService
             ->setExpiresAt(new \DateTimeImmutable(\sprintf('+%d days', $this->config->expirationDays())));
         $alert->save();
 
-        return self::outcomeOf($alert);
+        return self::outcomeOf($alert, true);
     }
 
-    private static function outcomeOf(PriceDropAlert $alert): SubscriptionOutcome
+    private static function outcomeOf(PriceDropAlert $alert, bool $ownedByCaller): SubscriptionOutcome
     {
-        return new SubscriptionOutcome($alert->getId(), (float) $alert->getReferencePrice(), $alert->getExpiresAt());
+        return new SubscriptionOutcome($alert->getId(), (float) $alert->getReferencePrice(), $alert->getExpiresAt(), $ownedByCaller);
     }
 
     /**
