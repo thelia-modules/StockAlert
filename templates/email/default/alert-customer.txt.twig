@@ -1,0 +1,10 @@
+{{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}
+
+{{ 'The product you were waiting for is back in stock: %product%.'|trans({'%product%': product_title ~ (combination ? ' (' ~ combination ~ ')' : '')}, 'stockalert.email.default', locale) }}
+
+{{ 'Order it now'|trans({}, 'stockalert.email.default', locale) }} : {{ product_url }}
+
+{{ 'This alert is sent once: the product may sell out again.'|trans({}, 'stockalert.email.default', locale) }}
+
+{{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }},
+{{ 'The %store% team.'|trans({'%store%': config('store_name')}, 'stockalert.email.default', locale) }}

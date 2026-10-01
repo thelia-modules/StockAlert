@@ -1,7 +1,9 @@
 {% form_theme form with flexy_form_themes only %}
 <div {{ attributes.defaults({class: 'StockAlert flex flex-col gap-3'}) }}>
     {% if success %}
-        <twig:Molecules:SnackBar:Base variant="success" withIcon text="{{ message }}" />
+        {% if showSuccessMessage %}
+            <twig:Molecules:SnackBar:Base variant="success" withIcon text="{{ message }}" />
+        {% endif %}
     {% else %}
         <p class="paragraph-3">{{ 'Tell me when it is back in stock'|trans({}, 'stockalert.fo.default') }}</p>
 
@@ -20,7 +22,9 @@
             <input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ pseId }}">
             {% do form.product_sale_elements_id.setRendered %}
             {{ form_row(form.email, {label: 'Email address'|trans({}, 'stockalert.fo.default')}) }}
-            {{ form_row(form.newsletter, {label: 'I would like to receive the newsletter or the latest news.'|trans({}, 'stockalert.fo.default')}) }}
+            {% if form.newsletter is defined %}
+                {{ form_row(form.newsletter, {label: 'I would like to receive the newsletter or the latest news.'|trans({}, 'stockalert.fo.default')}) }}
+            {% endif %}
             <twig:Molecules:Button:Base type="submit" text="{{ 'Alert me'|trans({}, 'stockalert.fo.default') }}" icon_left="bell" color="secondary" class="self-start" />
         {{ form_end(form) }}
     {% endif %}

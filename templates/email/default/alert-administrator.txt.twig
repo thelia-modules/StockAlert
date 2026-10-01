@@ -1,0 +1,11 @@
+{{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}
+
+{{ 'Some products are going to be out of stock:'|trans({}, 'stockalert.email.default', locale) }}
+
+{% for product in products %}
+{{ product.id }}: {{ product.ref }} - {{ product.title }}
+{{ product.url }}
+{{ 'Back office:'|trans({}, 'stockalert.email.default', locale) }} {{ product.admin_url }}
+
+{% endfor %}
+{{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }}

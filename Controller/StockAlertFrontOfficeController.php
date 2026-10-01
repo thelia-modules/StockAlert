@@ -14,6 +14,7 @@ namespace StockAlert\Controller;
 
 use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
+use StockAlert\Exception\SubscriptionRefusedException;
 use StockAlert\Form\StockAlertSubscribe;
 use StockAlert\Service\StockAlertService;
 use StockAlert\StockAlert;
@@ -25,6 +26,7 @@ use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
+use Thelia\Log\Tlog;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -50,9 +52,15 @@ class StockAlertFrontOfficeController extends BaseFrontController
         try {
             $subscribeForm = $this->validateForm($form)->getData();
             $message = $stockAlertService->subscribe($subscribeForm);
-        } catch (\Exception $e) {
+        } catch (SubscriptionRefusedException|FormValidationException $e) {
+            // Messages written for the visitor: a refusal of a listener, the errors of the form.
             $success = false;
             $message = $e->getMessage();
+        } catch (\Throwable $e) {
+            // The raw message may carry SQL, paths or an address: the class goes to the log, nothing to the visitor.
+            Tlog::getInstance()->error('Stock alert: a subscription failed ('.$e::class.')');
+            $success = false;
+            $message = Translator::getInstance()->trans('Something went wrong. Please try again later.', [], 'stockalert.fo.default');
         }
 
         if (!$request->isXmlHttpRequest()) {

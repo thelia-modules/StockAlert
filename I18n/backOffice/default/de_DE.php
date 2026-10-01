@@ -1,0 +1,25 @@
+<?php
+
+return array(
+    'Actions' => 'Aktionen',
+    'Configuration.' => 'Konfiguration',
+    'Date' => 'Datum',
+    'Email' => 'E-Mail',
+    'List of current subscriptions.' => 'Aktuelle Vormerkungen',
+    'Product' => 'Produkt',
+    'Save' => 'Speichern',
+    'The stock is not not use on the site. Please set the config variable check-available-stock to 1.' => 'Der Lagerbestand wird im Shop nicht verwendet. Bitte setzen Sie die Konfigurationsvariable check-available-stock auf 1.',
+    'There is no subscriptions.' => 'Es gibt noch keine Vormerkungen.',
+    'Back to the module configuration' => 'Zurück zur Modulkonfiguration',
+    'Followed products' => 'Verfolgte Artikel',
+    'No product is being followed for a price drop.' => 'Kein Artikel wird auf eine Preissenkung verfolgt.',
+    'Price drop alert' => 'Preisbenachrichtigung',
+    'Price drop alert follow-up' => 'Verfolgung der Preisbenachrichtigungen',
+    'Price drop alert pagination' => 'Seitennavigation der Preisbenachrichtigungen',
+    'Reference' => 'Referenz',
+    'Stock alert' => 'Lagerbenachrichtigung',
+    'Subscribers are counted, never named: the module mails them itself.' => 'Die Angemeldeten werden gezählt, nie genannt: das Modul schreibt ihnen selbst.',
+    'Subscriptions' => 'Anmeldungen',
+    'A visitor can ask to be warned when the price of a product drops. Subscriptions are listed by product, without the email addresses.' => 'Ein Besucher kann sich benachrichtigen lassen, wenn der Preis eines Artikels sinkt. Die Anmeldungen werden pro Artikel aufgelistet, ohne E-Mail-Adressen.',
+    'Waiting to be sent' => 'Wartet auf Versand',
+);

@@ -59,6 +59,8 @@ class StockAlertBackOfficeController extends BaseAdminController
             $emails = str_replace(' ', '', $configForm['emails']);
             ConfigQuery::write(StockAlert::CONFIG_EMAILS, $emails);
             ConfigQuery::write(StockAlert::CONFIG_NOTIFY, $configForm['notify']);
+            ConfigQuery::write(StockAlert::CONFIG_NEWSLETTER, !empty($configForm['newsletter']) ? '1' : '0');
+            ConfigQuery::write(StockAlert::CONFIG_CONFIRMATION, !empty($configForm['confirmation']) ? '1' : '0');
         } catch (FormValidationException $e) {
             $errorMessage = $e->getMessage();
         } catch (\Exception $e) {

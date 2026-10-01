@@ -16,6 +16,12 @@ readonly class StockAlertService
     {
     }
 
+    /**
+     * @param array{product_sale_elements_id: int|string|null, email: string, newsletter?: bool|null} $subscribeForm
+     *
+     * @throws \StockAlert\Exception\SubscriptionRefusedException when a listener refuses the subscription: its
+     *                                                           message is for the visitor
+     */
     public function subscribe(array $subscribeForm): string
     {
         $locale = \Thelia\Model\LangQuery::create()->findOneByByDefault(true)?->getLocale() ?? 'en_US';
@@ -26,7 +32,8 @@ readonly class StockAlertService
         $subscriberEvent = new StockAlertEvent(
             $subscribeForm['product_sale_elements_id'],
             $subscribeForm['email'],
-            $subscribeForm['newsletter'],
+            // The checkbox only exists when the shop offers the newsletter (setting stockalert_newsletter).
+            StockAlert::getConfig()['newsletter'] && !empty($subscribeForm['newsletter']),
             $locale
         );
 

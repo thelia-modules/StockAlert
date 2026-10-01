@@ -18,6 +18,7 @@ use StockAlert\Event\StockAlertEvent;
 use StockAlert\Event\StockAlertEvents;
 use StockAlert\Model\RestockingAlert;
 use StockAlert\Model\RestockingAlertQuery;
+use StockAlert\Service\RestockingMailer;
 use StockAlert\StockAlert;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -33,6 +34,7 @@ use Thelia\Model\Lang;
 use Thelia\Model\NewsletterQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
+use Thelia\Tools\URL;
 
 /**
  * Class StockAlertManager
@@ -46,10 +48,17 @@ class StockAlertManager implements EventSubscriberInterface
 
     protected $dispatcher;
 
-    public function __construct(MailerFactory $mailer, EventDispatcherInterface $dispatcher)
-    {
+    private readonly RestockingMailer $restockingMailer;
+
+    public function __construct(
+        MailerFactory $mailer,
+        EventDispatcherInterface $dispatcher,
+        ?RestockingMailer $restockingMailer = null,
+    ) {
         $this->mailer = $mailer;
         $this->dispatcher = $dispatcher;
+        // Optional so that a subclass or a service definition written for 3.1 keeps working.
+        $this->restockingMailer = $restockingMailer ?? new RestockingMailer($mailer, URL::getInstance());
     }
 
     /**
@@ -88,7 +97,9 @@ class StockAlertManager implements EventSubscriberInterface
             ->filterByProductSaleElementsId($productSaleElementsId)
             ->findOne();
 
-        if (null === $subscribe) {
+        $isNew = null === $subscribe;
+
+        if ($isNew) {
             $subscribe = new RestockingAlert();
             $subscribe
                 ->setProductSaleElementsId($productSaleElementsId)
@@ -98,7 +109,17 @@ class StockAlertManager implements EventSubscriberInterface
         }
 
         if ($subscribeToNewsLetter) {
-            $this->subscribeNewsletter($email,$event);
+            $this->subscribeNewsletter($email, $event);
+        }
+
+        if ($isNew && StockAlert::getConfig()['confirmation']) {
+            try {
+                $this->restockingMailer->sendSubscribed($email, (string) $event->getLocale(), (int) $productSaleElementsId);
+            } catch (\Throwable $exception) {
+                // The subscription stands: only the acknowledgement did not leave. The text of a mailer's exception may
+                // quote the address: the class and the sale element only.
+                Tlog::getInstance()->error(\sprintf('Stock alert: the acknowledgement for sale element %d was not sent (%s)', $productSaleElementsId, $exception::class));
+            }
         }
 
 
@@ -111,7 +132,8 @@ class StockAlertManager implements EventSubscriberInterface
 
         if (!$customer) {
 
-            $newsletter = new NewsletterEvent($email,"fr_FR");
+            // In the language of the storefront the visitor subscribed from, as the alert itself is.
+            $newsletter = new NewsletterEvent($email, (string) $event->getLocale());
             $this->dispatcher->dispatch($newsletter, TheliaEvents::NEWSLETTER_SUBSCRIBE);
 
         }
@@ -139,14 +161,14 @@ class StockAlertManager implements EventSubscriberInterface
                     ->filterByProductSaleElementsId($productSaleElementUpdateEvent->getProductSaleElementId())
                     ->find();
 
-                if (null !== $subscribers) {
-                    foreach ($subscribers as $subscriber) {
-                        try {
-                            $this->sendEmail($subscriber);
-                            $subscriber->delete();
-                        } catch (\Exception $ex) {
-                            ;
-                        }
+                foreach ($subscribers as $subscriber) {
+                    try {
+                        $this->sendEmail($subscriber);
+                        $subscriber->delete();
+                    } catch (\Throwable $exception) {
+                        // The subscriber stays registered for the next time the product is back.
+                        // The text of a mailer's exception may quote the address: the class and the sale element only.
+                        Tlog::getInstance()->error(\sprintf('Stock alert: the message of a restocking alert for sale element %d was not sent (%s)', $subscriber->getProductSaleElementsId(), $exception::class));
                     }
                 }
             }
@@ -154,35 +176,47 @@ class StockAlertManager implements EventSubscriberInterface
     }
 
     /**
-     * @param RestockingAlert $subscriber
-     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \RuntimeException when the message cannot be built or does not leave
      */
     public function sendEmail(RestockingAlert $subscriber)
     {
-        $contactEmail = ConfigQuery::read('store_email');
+        $this->restockingMailer->sendBackInStock(
+            (string) $subscriber->getEmail(),
+            (string) ($subscriber->getLocale() ?: Lang::getDefaultLanguage()->getLocale()),
+            (int) $subscriber->getProductSaleElementsId(),
+        );
+    }
 
-        if ($contactEmail) {
-            $pse = ProductSaleElementsQuery::create()->findPk($subscriber->getProductSaleElementsId());
+    /**
+     * What the message to the administrator lists about each product: its reference, its title, its page on the
+     * shop and its page in the back office.
+     *
+     * @param array<int, int|string> $productIds
+     *
+     * @return list<array{id: int, ref: string, title: string, url: string, admin_url: string}>
+     */
+    private function describeProducts(array $productIds, string $locale): array
+    {
+        $url = URL::getInstance();
+        $products = [];
 
-            $this->mailer->sendEmailMessage(
-                'stockalert_customer',
-                [ $contactEmail => ConfigQuery::read('store_name') ],
-                [ $subscriber->getEmail() => ConfigQuery::read('store_name') ],
-                [
-                    'locale' => $subscriber->getLocale(),
-                    'pse_id' => $pse->getId(),
-                    'product_id' => $pse->getProductId(),
-                    'product_title' => $pse->getProduct()->setLocale($subscriber->getLocale())->getTitle()
-                ],
-                $subscriber->getLocale()
-            );
+        foreach (ProductQuery::create()->filterById($productIds, Criteria::IN)->orderById()->find() as $product) {
+            try {
+                $productUrl = (string) $url->retrieve('product', $product->getId(), $locale)->toString();
+            } catch (\Throwable) {
+                $productUrl = $url->absoluteUrl('/product/'.$product->getId());
+            }
 
-            Tlog::getInstance()->debug("Restocking Alert sent to customer " . $subscriber->getEmail());
-        } else {
-            Tlog::getInstance()->debug(
-                "Restocking Alert: no contact email is defined !"
-            );
+            $products[] = [
+                'id' => $product->getId(),
+                'ref' => (string) $product->getRef(),
+                'title' => (string) $product->setLocale($locale)->getTitle(),
+                'url' => $productUrl,
+                'admin_url' => $url->absoluteUrl('/admin/products/update', ['product_id' => $product->getId()]),
+            ];
         }
+
+        return $products;
     }
 
     public function checkStockForAdmin(OrderEvent $event)
@@ -241,7 +275,8 @@ class StockAlertManager implements EventSubscriberInterface
                     $to,
                     [
                         'locale' => $locale,
-                        'products_id' => $productIds
+                        'products_id' => $productIds,
+                        'products' => $this->describeProducts($productIds, $locale),
                     ],
                     $locale
                 );

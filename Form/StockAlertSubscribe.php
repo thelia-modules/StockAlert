@@ -72,15 +72,19 @@ class StockAlertSubscribe extends BaseForm
                         "for" => "email"
                     ]
                 ]
-            )
-            // Add Newsletter checkbox
-            ->add("newsletter", CheckboxType::class, array(
-                "label" => Translator::getInstance()->trans('I would like to receive the newsletter or the latest news.'),
+            );
+
+        // The newsletter checkbox is the shop's choice (setting stockalert_newsletter, off by default): a form
+        // without the field refuses nothing and subscribes nobody, the visitor is never shown a box that does nothing.
+        if (StockAlert::getConfig()['newsletter']) {
+            $this->formBuilder->add("newsletter", CheckboxType::class, array(
+                "label" => Translator::getInstance()->trans('I would like to receive the newsletter or the latest news.', [], 'stockalert.fo.default'),
                 "label_attr" => array(
                     "for" => "newsletter",
                 ),
                 "required" => false,
             ));
+        }
     }
 
     /**

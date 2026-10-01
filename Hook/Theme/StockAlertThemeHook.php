@@ -54,8 +54,14 @@ final readonly class StockAlertThemeHook implements ThemeHookInterface
             return '';
         }
 
+        // A theme that closes its own window after a subscription passes `showSuccessMessage: false`.
+        $showSuccessMessage = (bool) ($parameters['showSuccessMessage'] ?? true);
+
         if (self::RESTOCKING_HOOK === $hookName) {
-            return $this->twig->render('@StockAlertModule/theme_hook/stockAlert.html.twig', ['pseId' => (int) $pseId]);
+            return $this->twig->render('@StockAlertModule/theme_hook/stockAlert.html.twig', [
+                'pseId' => (int) $pseId,
+                'showSuccessMessage' => $showSuccessMessage,
+            ]);
         }
 
         $outOfStock = (bool) ($parameters['outOfStock'] ?? false);
@@ -69,6 +75,7 @@ final readonly class StockAlertThemeHook implements ThemeHookInterface
 
         return $this->twig->render('@StockAlertModule/theme_hook/productAlerts.html.twig', [
             'pseId' => (int) $pseId,
+            'showSuccessMessage' => $showSuccessMessage,
             'outOfStock' => $outOfStock,
             'priceDropEnabled' => $priceDropEnabled,
             'taxedPrice' => is_numeric($taxedPrice) ? (float) $taxedPrice : null,

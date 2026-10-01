@@ -1,0 +1,17 @@
+{% extends "email-layout.html.twig" %}
+
+{% block browser %}{% endblock %}
+{% block image_header %}{% endblock %}
+{% block pre_header %}{% endblock %}
+
+{% block email_subject %}{{ 'Your alert for %product%'|trans({'%product%': product_title}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_title %}{{ 'Your alert for %product%'|trans({'%product%': product_title}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_content %}
+    {{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'Your alert for %product% has been registered.'|trans({'%product%': '<a href="' ~ product_url|e ~ '">' ~ product_title|e ~ '</a>' ~ (combination ? ' (' ~ combination|e ~ ')' : '')}, 'stockalert.email.default', locale)|raw }}<br /><br />
+    {{ 'We will email you as soon as it is available again.'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }},<br />
+    {{ 'The %store% team.'|trans({'%store%': config('store_name')}, 'stockalert.email.default', locale) }}
+{% endblock %}

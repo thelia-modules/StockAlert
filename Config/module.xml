@@ -9,11 +9,15 @@
     <descriptive locale="fr_FR">
         <title>Alertes Stock</title>
     </descriptive>
+    <descriptive locale="de_DE">
+        <title>Lagerbenachrichtigungen</title>
+    </descriptive>
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
+        <language>de_DE</language>
     </languages>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <author>
         <name>Julien Chanséaume</name>
         <email>julien@thelia.net</email>
