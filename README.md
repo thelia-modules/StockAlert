@@ -85,3 +85,42 @@ admin API, imports, currency rate updates, or a catalog price rule whose period 
 The product page calls `theme_hook('product.pse.alerts', {pseId, outOfStock, taxedPrice})` inside
 the sale element selector; the module renders the restocking alert when the selected sale element
 is out of stock and the price drop alert when the feature is enabled.
+
+## Restocking alert (3.2.0)
+
+A visitor asks to be told when a sale element that is out of stock is back. `StockAlertEvents::STOCK_ALERT_SUBSCRIBE`
+is dispatched with a `StockAlertEvent`; the module's own listener (priority 128) records the address in
+`restocking_alert` and the product being back is detected on the update of a sale element
+(`TheliaEvents::PRODUCT_UPDATE_PRODUCT_SALE_ELEMENT`).
+
+### Settings
+
+On the module configuration page, next to the stock thresholds:
+
+| Setting | Default | |
+|---|---|---|
+| `stockalert_newsletter` | off | Shows a newsletter checkbox on the form. A visitor who ticks it is subscribed in the language of the storefront. Without it the form has no such field. |
+| `stockalert_confirmation` | off | Sends the visitor an acknowledgement (`stockalert_subscribed`) when the address is recorded. |
+
+Activating the module again, or updating it, writes a default only for a setting the shop has no value for:
+a value set before the activation, or chosen by the merchant, is kept.
+
+### What the visitor reads
+
+A listener of the subscription event may refuse it with a `StockAlert\Exception\SubscriptionRefusedException`
+(the size is in stock, the address is already registered, too many requests...). Its message is shown as it is
+and must be written for the visitor, in their language. Any other failure is logged and shown as a generic
+message, never the text of the exception.
+
+A theme that closes its own window once the subscription is made calls the hook with
+`showSuccessMessage: false`: the component then renders nothing and dispatches the browser event
+`stockalert:subscribed` (`{pseId}`).
+
+### Messages
+
+`stockalert_customer` (the product is back), `stockalert_subscribed` (acknowledgement) and
+`stockalert_administrator` (products running low), each a Twig template pair in `templates/email/default/`
+(`<name>.html.twig`, `<name>.txt.twig`) translated in `I18n/email/default/` (en_US, fr_FR, de_DE). The
+customer messages receive `locale`, `product_id`, `pse_id`, `product_title`, `product_url` and `combination`;
+`StockAlert\Service\RestockingMailer` builds and sends them. Code that sends the messages itself (a shop that
+keeps its own list of subscribers) gives the same variables.

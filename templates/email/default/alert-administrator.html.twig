@@ -1,0 +1,20 @@
+{% extends "email-layout.html.twig" %}
+
+{% block browser %}{% endblock %}
+{% block image_header %}{% endblock %}
+{% block pre_header %}{% endblock %}
+
+{% block email_subject %}{{ 'Some products are going to be out of stock'|trans({}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_title %}{{ 'Some products are going to be out of stock'|trans({}, 'stockalert.email.default', locale) }}{% endblock %}
+
+{% block email_content %}
+    {{ 'Hello,'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {{ 'Some products are going to be out of stock:'|trans({}, 'stockalert.email.default', locale) }}<br /><br />
+    {% for product in products %}
+        {{ product.id }}: {{ product.ref }} - {{ product.title }}<br />
+        <a href="{{ product.url }}">{{ product.url }}</a><br />
+        {{ 'Back office:'|trans({}, 'stockalert.email.default', locale) }} <a href="{{ product.admin_url }}">{{ product.admin_url }}</a><br /><br />
+    {% endfor %}
+    {{ 'Kind regards'|trans({}, 'stockalert.email.default', locale) }}
+{% endblock %}

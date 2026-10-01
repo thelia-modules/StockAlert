@@ -25,7 +25,7 @@ return [
     'You have already subscribed to this product' => 'You have already subscribed to this product',
     'You will recieve a notification when the quantity in stock is lower or equal to this value.' => 'You will recieve a notification when the quantity in stock is lower or equal to this value.',
     'Your request has been taken into account' => 'Your request has been taken into account',
-    'Got it! You’ll receive an email as soon as the product is back in stock.' => 'C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.',
+    'Got it! You’ll receive an email as soon as the product is back in stock.' => 'Got it! You’ll receive an email as soon as the product is back in stock.',
     'Price drop alert enabled' => 'Price drop alert enabled',
     'Price drop threshold (%)' => 'Price drop threshold (%)',
     'A subscriber is notified only when the new price is lower than the price seen by at least this percentage.' => 'A subscriber is notified only when the new price is lower than the price seen by at least this percentage.',
@@ -35,4 +35,8 @@ return [
     'A visitor who reached this number of subscriptions cannot add another one.' => 'A visitor who reached this number of subscriptions cannot add another one.',
     'Alerts sent per run' => 'Alerts sent per run',
     'Number of pending alerts the scheduled command sends on each run.' => 'Number of pending alerts the scheduled command sends on each run.',
+    'Offer the newsletter' => 'Offer the newsletter',
+    'Shows a checkbox on the alert form: a visitor who ticks it is subscribed to the newsletter, in the language of the storefront.' => 'Shows a checkbox on the alert form: a visitor who ticks it is subscribed to the newsletter, in the language of the storefront.',
+    'Send an acknowledgement' => 'Send an acknowledgement',
+    'Sends an email to the visitor who subscribes, in the language of the storefront.' => 'Sends an email to the visitor who subscribes, in the language of the storefront.',
 ];

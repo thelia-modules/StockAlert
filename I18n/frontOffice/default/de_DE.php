@@ -1,0 +1,27 @@
+<?php
+
+return array(
+    'Notify me !' => 'Benachrichtigen Sie mich!',
+    'Register your email to be notified when it will be available again.' => 'Hinterlassen Sie Ihre E-Mail-Adresse, um benachrichtigt zu werden, sobald er wieder verfügbar ist.',
+    'This product is not available for now.' => 'Dieser Artikel ist im Moment nicht verfügbar.',
+    'Alerts on this variant' => 'Benachrichtigungen für diese Variante',
+    'Tell me if the price drops' => 'Benachrichtigen Sie mich, wenn der Preis sinkt',
+    'currently %price%' => 'aktuell %price%',
+    'Email address' => 'E-Mail-Adresse',
+    'Alert me' => 'Benachrichtigen Sie mich',
+    'Noted. We will email you if this variant drops below %price%.' => 'Vermerkt. Wir schreiben Ihnen, falls diese Variante unter %price% fällt.',
+    'Too many requests for now. Please try again in a little while.' => 'Im Moment zu viele Anfragen. Bitte versuchen Sie es in Kürze erneut.',
+    'This address already follows the maximum number of products. Unsubscribe from one first.' => 'Diese Adresse verfolgt bereits die maximale Anzahl an Artikeln. Beenden Sie zuerst die Verfolgung eines Artikels.',
+    'Price alerts are not available at the moment.' => 'Preisbenachrichtigungen sind im Moment nicht verfügbar.',
+    'This variant cannot be followed. Please reload the page.' => 'Diese Variante kann nicht verfolgt werden. Bitte laden Sie die Seite neu.',
+    'Choose a variant first.' => 'Wählen Sie zuerst eine Variante.',
+    'Tell me when it is back in stock' => 'Benachrichtigen Sie mich, wenn er wieder auf Lager ist',
+    'Please enter a valid email address.' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+    'Something went wrong. Please try again later.' => 'Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.',
+    'I would like to receive the newsletter or the latest news.' => 'Ich möchte den Newsletter und aktuelle Neuigkeiten erhalten.',
+    'Changed your mind?' => 'Anders überlegt?',
+    'Cancel this alert' => 'Diese Benachrichtigung abbrechen',
+    'Price alert cancelled' => 'Preisbenachrichtigung abgebrochen',
+    'You will not receive an email for this product. You can subscribe again from its page at any time.' => 'Sie erhalten keine E-Mail zu diesem Artikel. Sie können sich jederzeit auf seiner Seite erneut anmelden.',
+    'Back to the shop' => 'Zurück zum Shop',
+);

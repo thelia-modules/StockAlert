@@ -109,6 +109,40 @@ class StockAlertConfig extends BaseForm
                 ]
             )
             ->add(
+                'newsletter',
+                CheckboxType::class,
+                [
+                    "required" => false,
+                    "data" => $config['newsletter'],
+                    "label" => Translator::getInstance()->trans("Offer the newsletter", [], StockAlert::MESSAGE_DOMAIN),
+                    "label_attr" => [
+                        "for" => "newsletter",
+                        "help" => Translator::getInstance()->trans(
+                            "Shows a checkbox on the alert form: a visitor who ticks it is subscribed to the newsletter, in the language of the storefront.",
+                            [],
+                            StockAlert::MESSAGE_DOMAIN
+                        ),
+                    ]
+                ]
+            )
+            ->add(
+                'confirmation',
+                CheckboxType::class,
+                [
+                    "required" => false,
+                    "data" => $config['confirmation'],
+                    "label" => Translator::getInstance()->trans("Send an acknowledgement", [], StockAlert::MESSAGE_DOMAIN),
+                    "label_attr" => [
+                        "for" => "confirmation",
+                        "help" => Translator::getInstance()->trans(
+                            "Sends an email to the visitor who subscribes, in the language of the storefront.",
+                            [],
+                            StockAlert::MESSAGE_DOMAIN
+                        ),
+                    ]
+                ]
+            )
+            ->add(
                 'threshold',
                 IntegerType::class,
                 [

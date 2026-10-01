@@ -34,4 +34,9 @@ return [
     'A visitor who reached this number of subscriptions cannot add another one.' => 'Un visiteur qui a atteint ce nombre d\'inscriptions ne peut plus en ajouter.',
     'Alerts sent per run' => 'Alertes envoyées par passage',
     'Number of pending alerts the scheduled command sends on each run.' => 'Nombre d\'alertes en attente que la commande planifiée envoie à chaque passage.',
+    'Offer the newsletter' => 'Proposer la lettre d\'information',
+    'Shows a checkbox on the alert form: a visitor who ticks it is subscribed to the newsletter, in the language of the storefront.' => 'Affiche une case sur le formulaire d\'alerte : le visiteur qui la coche est inscrit à la lettre d\'information, dans la langue de la vitrine.',
+    'Send an acknowledgement' => 'Envoyer un accusé de réception',
+    'Sends an email to the visitor who subscribes, in the language of the storefront.' => 'Envoie un e-mail au visiteur qui s\'inscrit, dans la langue de la vitrine.',
+    'Got it! You’ll receive an email as soon as the product is back in stock.' => 'C’est noté ! Vous recevrez un e-mail dès que le produit sera de nouveau en stock.',
 ];

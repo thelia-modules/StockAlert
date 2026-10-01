@@ -49,6 +49,8 @@ class StockAlert extends BaseModule
     public const CONFIG_THRESHOLD = 'stockalert_threshold';
     public const CONFIG_EMAILS = 'stockalert_emails';
     public const CONFIG_NOTIFY = 'stockalert_notify';
+    public const CONFIG_NEWSLETTER = 'stockalert_newsletter';
+    public const CONFIG_CONFIRMATION = 'stockalert_confirmation';
 
     public const CONFIG_PRICE_DROP_ENABLED = 'stockalert_price_drop_enabled';
     public const CONFIG_PRICE_DROP_THRESHOLD_PERCENT = 'stockalert_price_drop_threshold_percent';
@@ -57,6 +59,9 @@ class StockAlert extends BaseModule
     public const CONFIG_PRICE_DROP_BATCH_SIZE = 'stockalert_price_drop_batch_size';
 
     public const MESSAGE_PRICE_DROP = 'stockalert_price_drop';
+    public const MESSAGE_CUSTOMER = 'stockalert_customer';
+    public const MESSAGE_ADMINISTRATOR = 'stockalert_administrator';
+    public const MESSAGE_SUBSCRIBED = 'stockalert_subscribed';
 
     public const DEFAULT_PRICE_DROP_ENABLED = '0';
     public const DEFAULT_PRICE_DROP_THRESHOLD_PERCENT = '5';
@@ -68,6 +73,8 @@ class StockAlert extends BaseModule
     public const DEFAULT_THRESHOLD = '1';
     public const DEFAULT_EMAILS = '';
     public const DEFAULT_NOTIFY = '1';
+    public const DEFAULT_NEWSLETTER = '0';
+    public const DEFAULT_CONFIRMATION = '0';
 
     /** @var Translator */
     protected $translator;
@@ -79,6 +86,8 @@ class StockAlert extends BaseModule
             'threshold' => (int) ConfigQuery::read(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD),
             'emails' => explode(',', ConfigQuery::read(self::CONFIG_EMAILS, self::DEFAULT_EMAILS)),
             'notify' => ('1' == ConfigQuery::read(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY)),
+            'newsletter' => ('1' == ConfigQuery::read(self::CONFIG_NEWSLETTER, self::DEFAULT_NEWSLETTER)),
+            'confirmation' => ('1' == ConfigQuery::read(self::CONFIG_CONFIRMATION, self::DEFAULT_CONFIRMATION)),
         ];
 
         return $config;
@@ -89,39 +98,8 @@ class StockAlert extends BaseModule
      */
     public function postActivation(?ConnectionInterface $con = null): void
     {
-        ConfigQuery::write(self::CONFIG_ENABLED, self::DEFAULT_ENABLED);
-        ConfigQuery::write(self::CONFIG_THRESHOLD, self::DEFAULT_THRESHOLD);
-        ConfigQuery::write(self::CONFIG_EMAILS, ConfigQuery::read('store_notification_emails'));
-        ConfigQuery::write(self::CONFIG_NOTIFY, self::DEFAULT_NOTIFY);
-
-        // create new message
-        if (null === MessageQuery::create()->findOneByName('stockalert_customer')) {
-            (new Message())
-                ->setName('stockalert_customer')
-                ->setHtmlTemplateFileName('alert-customer.html')
-                ->setTextTemplateFileName('alert-customer.txt')
-                ->setSecured(0)
-                ->setLocale('en_US')
-                ->setTitle('Stock Alert - Customer')
-                ->setSubject('Product {$product_title} is available again')
-                ->setLocale('fr_FR')
-                ->setTitle('Alerte Stock - Client')
-                ->setSubject('Le produit {$product_title} est à nouveau disponible')
-                ->save();
-
-            (new Message())
-                ->setName('stockalert_administrator')
-                ->setHtmlTemplateFileName('alert-administrator.html')
-                ->setTextTemplateFileName('alert-administrator.txt')
-                ->setSecured(0)
-                ->setLocale('en_US')
-                ->setTitle('Stock Alert - Administrator')
-                ->setSubject('List of products nearly out of stock')
-                ->setLocale('fr_FR')
-                ->setTitle('Alerte Stock - Administrateur')
-                ->setSubject('Liste des produits qui seront bientôt en rupture de stock')
-                ->save();
-        }
+        $this->ensureSettings();
+        $this->ensureMessages($con);
 
         $this->ensurePriceDropSetup($con);
 
@@ -158,7 +136,89 @@ class StockAlert extends BaseModule
             }
         }
 
+        $this->ensureSettings();
+        $this->ensureMessages($con);
         $this->ensurePriceDropSetup($con);
+    }
+
+    /**
+     * Writes the default of each setting the shop has no value for, and nothing else: activating the
+     * module again, or updating it, never takes back what the merchant chose (or what the shop was
+     * set up with before the module was activated).
+     */
+    private function ensureSettings(): void
+    {
+        $defaults = [
+            self::CONFIG_ENABLED => self::DEFAULT_ENABLED,
+            self::CONFIG_THRESHOLD => self::DEFAULT_THRESHOLD,
+            self::CONFIG_EMAILS => (string) ConfigQuery::read('store_notification_emails'),
+            self::CONFIG_NOTIFY => self::DEFAULT_NOTIFY,
+            self::CONFIG_NEWSLETTER => self::DEFAULT_NEWSLETTER,
+            self::CONFIG_CONFIRMATION => self::DEFAULT_CONFIRMATION,
+        ];
+
+        foreach ($defaults as $name => $value) {
+            if (null === ConfigQuery::read($name)) {
+                ConfigQuery::write($name, $value);
+            }
+        }
+    }
+
+    /**
+     * Creates the messages of the module, and gives the ones that already exist the languages of the shop
+     * they lack (an install of 3.1 has English and French only): a title or a subject that is there is kept.
+     * The text of a message is its template, `templates/email/default/<name>.html.twig` and `.txt.twig`.
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    private function ensureMessages(?ConnectionInterface $con = null): void
+    {
+        $messages = [
+            self::MESSAGE_CUSTOMER => [
+                'alert-customer.html', 'alert-customer.txt',
+                ['Stock Alert - Customer', 'Alerte Stock - Client', 'Lagerbenachrichtigung - Kunde'],
+                ['Product {{ product_title }} is available again', 'Le produit {{ product_title }} est à nouveau disponible', 'Der Artikel {{ product_title }} ist wieder verfügbar'],
+            ],
+            self::MESSAGE_ADMINISTRATOR => [
+                'alert-administrator.html', 'alert-administrator.txt',
+                ['Stock Alert - Administrator', 'Alerte Stock - Administrateur', 'Lagerbenachrichtigung - Administrator'],
+                ['List of products nearly out of stock', 'Liste des produits qui seront bientôt en rupture de stock', 'Artikel, die bald nicht mehr auf Lager sind'],
+            ],
+            self::MESSAGE_SUBSCRIBED => [
+                'alert-subscribed.html', 'alert-subscribed.txt',
+                ['Stock Alert - Subscription', 'Alerte Stock - Inscription', 'Lagerbenachrichtigung - Vormerkung'],
+                ['Your alert for {{ product_title }}', 'Votre alerte pour le produit {{ product_title }}', 'Ihre Benachrichtigung für {{ product_title }}'],
+            ],
+        ];
+
+        foreach ($messages as $name => [$htmlTemplate, $textTemplate, $titles, $subjects]) {
+            $message = MessageQuery::create()->findOneByName($name) ?? (new Message())
+                ->setName($name)
+                ->setHtmlTemplateFileName($htmlTemplate)
+                ->setTextTemplateFileName($textTemplate)
+                ->setSecured(0);
+
+            foreach (LangQuery::create()->find($con) as $lang) {
+                $locale = $lang->getLocale();
+                $index = match (substr($locale, 0, 2)) {
+                    'fr' => 1,
+                    'de' => 2,
+                    default => 0,
+                };
+
+                $message->setLocale($locale);
+
+                if ('' === trim((string) $message->getTitle())) {
+                    $message->setTitle($titles[$index]);
+                }
+
+                if ('' === trim((string) $message->getSubject())) {
+                    $message->setSubject($subjects[$index]);
+                }
+            }
+
+            $message->save($con);
+        }
     }
 
     /**
@@ -198,14 +258,16 @@ class StockAlert extends BaseModule
 
         foreach (LangQuery::create()->find($con) as $lang) {
             $locale = $lang->getLocale();
-            $isFrench = str_starts_with($locale, 'fr');
+            [$title, $subject] = match (substr($locale, 0, 2)) {
+                'fr' => ['Alerte Baisse de Prix - Client', 'Le prix de {{ product_title }} a baissé'],
+                'de' => ['Preisbenachrichtigung - Kunde', 'Der Preis von {{ product_title }} ist gesunken'],
+                default => ['Price Drop Alert - Customer', 'The price of {{ product_title }} has dropped'],
+            };
 
             $message
                 ->setLocale($locale)
-                ->setTitle($isFrench ? 'Alerte Baisse de Prix - Client' : 'Price Drop Alert - Customer')
-                ->setSubject($isFrench
-                    ? 'Le prix de {{ product_title }} a baissé'
-                    : 'The price of {{ product_title }} has dropped');
+                ->setTitle($title)
+                ->setSubject($subject);
         }
 
         $message->save($con);
@@ -218,14 +280,10 @@ class StockAlert extends BaseModule
      */
     public function destroy(?ConnectionInterface $con = null, $deleteModuleData = false): void
     {
-        if (null !== $msg = MessageQuery::create()->findOneByName('stockalert_customer')) {
-            $msg->delete();
-        }
-        if (null !== $msg = MessageQuery::create()->findOneByName('stockalert_administrator')) {
-            $msg->delete();
-        }
-        if (null !== $msg = MessageQuery::create()->findOneByName(self::MESSAGE_PRICE_DROP)) {
-            $msg->delete();
+        foreach ([self::MESSAGE_CUSTOMER, self::MESSAGE_ADMINISTRATOR, self::MESSAGE_SUBSCRIBED, self::MESSAGE_PRICE_DROP] as $name) {
+            if (null !== $msg = MessageQuery::create()->findOneByName($name)) {
+                $msg->delete();
+            }
         }
 
         ConfigQuery::create()
@@ -234,6 +292,8 @@ class StockAlert extends BaseModule
                 self::CONFIG_THRESHOLD,
                 self::CONFIG_EMAILS,
                 self::CONFIG_NOTIFY,
+                self::CONFIG_NEWSLETTER,
+                self::CONFIG_CONFIRMATION,
                 self::CONFIG_PRICE_DROP_ENABLED,
                 self::CONFIG_PRICE_DROP_THRESHOLD_PERCENT,
                 self::CONFIG_PRICE_DROP_EXPIRATION_DAYS,

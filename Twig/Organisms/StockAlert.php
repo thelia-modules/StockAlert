@@ -14,9 +14,11 @@ declare(strict_types=1);
 
 namespace StockAlert\Twig\Organisms;
 
+use StockAlert\Exception\SubscriptionRefusedException;
 use StockAlert\Service\StockAlertService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -25,7 +27,17 @@ use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Core\Translation\Translator;
+use Thelia\Log\Tlog;
 
+/**
+ * The restocking alert form of a sale element out of stock.
+ *
+ * What the visitor reads when something goes wrong is never an exception message, except the one of a
+ * SubscriptionRefusedException (a refusal a listener wrote for them): any other failure is logged and shown
+ * as a generic message. After a subscription the component says so, unless the page asked not to
+ * (`showSuccessMessage: false`): it then renders nothing and dispatches the browser event
+ * `stockalert:subscribed`, for a page that closes its own window.
+ */
 #[AsLiveComponent(name: 'StockAlert', template: '@StockAlertModule/components/StockAlert.html.twig')]
 class StockAlert extends AbstractController
 {
@@ -41,6 +53,9 @@ class StockAlert extends AbstractController
 
     #[LiveProp]
     public ?string $message = null;
+
+    #[LiveProp]
+    public bool $showSuccessMessage = true;
 
     public function __construct(
         private readonly FormServiceInterface $formService,
@@ -75,13 +90,41 @@ class StockAlert extends AbstractController
                 $data['product_sale_elements_id'] = $this->pseId ?? $data['product_sale_elements_id'];
                 $this->message = $this->stockAlertService->subscribe($data);
                 $this->success = true;
+                $this->dispatchBrowserEvent('stockalert:subscribed', ['pseId' => $this->pseId]);
             } else {
                 $this->success = false;
-                $this->message = Translator::getInstance()->trans('Please enter a valid email address.', [], 'stockalert.fo.default');
+                $this->message = $this->formErrorMessage();
             }
-        } catch (\Throwable) {
+        } catch (SubscriptionRefusedException $refused) {
+            $this->success = false;
+            $this->message = $refused->getMessage();
+        } catch (UnprocessableEntityHttpException) {
+            // submitForm() throws when the form is invalid, to have the page re-rendered with its errors:
+            // here they are shown by the component itself.
+            $this->success = false;
+            $this->message = $this->formErrorMessage();
+        } catch (\Throwable $exception) {
+            // The raw message may carry SQL, paths or an address: the class goes to the log, nothing to the visitor.
+            Tlog::getInstance()->error('Stock alert: a subscription failed ('.$exception::class.')');
             $this->success = false;
             $this->message = Translator::getInstance()->trans('Something went wrong. Please try again later.', [], 'stockalert.fo.default');
         }
+    }
+
+    /**
+     * A wrong address has the module's own message; any other refusal of the form (a robot check that
+     * failed, a field a theme added) its first message, which the form writes for the visitor.
+     */
+    private function formErrorMessage(): string
+    {
+        $form = $this->getForm();
+
+        if (0 === $form->get('email')->getErrors()->count()) {
+            foreach ($form->getErrors(true) as $error) {
+                return $error->getMessage();
+            }
+        }
+
+        return Translator::getInstance()->trans('Please enter a valid email address.', [], 'stockalert.fo.default');
     }
 }
