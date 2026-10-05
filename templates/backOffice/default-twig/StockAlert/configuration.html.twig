@@ -45,7 +45,8 @@
 									{% endif %}
 								</td>
 								<td class="text-end">
-									<form method="post" class="d-inline" action="{{ path('stockalert.config.delete', {'id': subscription.id}) }}&_token={{ assignToken() }}">
+									<form method="post" class="d-inline" action="{{ path('stockalert.config.delete', {'id': subscription.id}) }}">
+										<input type="hidden" name="_token" value="{{ assignToken() }}">
 										<button type="submit" class="btn btn-danger btn-sm">
 											<i class="bi bi-trash"></i>
 										</button>
