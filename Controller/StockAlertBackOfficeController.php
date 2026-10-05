@@ -89,7 +89,7 @@ class StockAlertBackOfficeController extends BaseAdminController
 
         $request = $requestStack->getCurrentRequest();
 
-        $tokenProvider->checkToken((string) $request->query->get('_token'));
+        $tokenProvider->checkToken((string) $request->request->get('_token'));
 
         $restockingAlertId = $request->query->get('id');
         if ($restockingAlertId) {
