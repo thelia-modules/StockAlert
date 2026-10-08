@@ -24,6 +24,7 @@ use StockAlert\StockAlert;
 use Symfony\Component\Mailer\MailerInterface;
 use Thelia\Core\Template\Parser\ParserResolver;
 use Thelia\Core\Template\TemplateHelperInterface;
+use Thelia\Domain\Order\Service\OrderHistoryRecorder;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Tools\URL;
 
@@ -40,6 +41,7 @@ final class PriceDropQueueProcessorTest extends PriceDropTestCase
             $this->getService(TemplateHelperInterface::class),
             $this->getService(ParserResolver::class),
             $this->getService(MailerInterface::class),
+            $this->getService(OrderHistoryRecorder::class),
         );
         $this->processor = new PriceDropQueueProcessor($this->mailer, $this->getService(URL::class), new NullLogger(), $this->getService(EffectivePriceResolver::class));
     }
