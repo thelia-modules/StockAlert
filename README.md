@@ -9,7 +9,7 @@ This module has two different features :
  
 ### Manually
 
-This module requires Thelia in version 2.1
+This module requires Thelia 3.1.0 or later.
 
 It must be placed into your modules/ directory (local/modules/).
 
@@ -25,7 +25,7 @@ Next, go to your Thelia admin panel for module activation.
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/stock-alert-module ~2.0
+composer require thelia/stock-alert-module
 ```
 
 ## Configuration
