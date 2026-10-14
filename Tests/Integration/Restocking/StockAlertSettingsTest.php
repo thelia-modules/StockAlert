@@ -33,7 +33,7 @@ final class StockAlertSettingsTest extends RestockingTestCase
         $this->writeConfig(StockAlert::CONFIG_EMAILS, 'stock@example.com');
         $this->writeConfig(StockAlert::CONFIG_NEWSLETTER, '1');
 
-        new StockAlert()->postActivation();
+        (new StockAlert())->postActivation();
 
         $config = StockAlert::getConfig();
         self::assertFalse($config['enabled'], 'the alert to the administrator, off, stays off');
@@ -48,7 +48,7 @@ final class StockAlertSettingsTest extends RestockingTestCase
             $this->removeConfig($name);
         }
 
-        new StockAlert()->postActivation();
+        (new StockAlert())->postActivation();
 
         $config = StockAlert::getConfig();
         self::assertTrue($config['enabled']);
@@ -63,14 +63,14 @@ final class StockAlertSettingsTest extends RestockingTestCase
         $this->removeConfig(StockAlert::CONFIG_ENABLED);
         $this->writeConfig(StockAlert::CONFIG_ENABLED, '0');
 
-        new StockAlert()->postActivation();
+        (new StockAlert())->postActivation();
 
         self::assertFalse(StockAlert::getConfig()['enabled']);
     }
 
     public function testEveryMessageHasATitleAndASubjectInEveryLanguageOfTheShop(): void
     {
-        new StockAlert()->postActivation();
+        (new StockAlert())->postActivation();
 
         foreach ([StockAlert::MESSAGE_CUSTOMER, StockAlert::MESSAGE_ADMINISTRATOR, StockAlert::MESSAGE_SUBSCRIBED] as $name) {
             $message = MessageQuery::create()->findOneByName($name);
@@ -91,7 +91,7 @@ final class StockAlertSettingsTest extends RestockingTestCase
         $message->setLocale('fr_FR')->setSubject('Sujet choisi par le marchand')->save();
         MessageQuery::create()->findOneByName(StockAlert::MESSAGE_SUBSCRIBED)?->delete();
 
-        new StockAlert()->update('3.1.0', '3.2.0', Propel::getConnection(MessageTableMap::DATABASE_NAME));
+        (new StockAlert())->update('3.1.0', '3.2.0', Propel::getConnection(MessageTableMap::DATABASE_NAME));
 
         $message = MessageQuery::create()->findOneByName(StockAlert::MESSAGE_CUSTOMER);
         self::assertSame('Der Artikel {{ product_title }} ist wieder verfügbar', $message->setLocale('de_DE')->getSubject());

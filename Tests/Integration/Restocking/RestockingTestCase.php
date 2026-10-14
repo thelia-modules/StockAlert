@@ -16,9 +16,10 @@ namespace StockAlert\Tests\Integration\Restocking;
 
 use StockAlert\Model\RestockingAlertQuery;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mailer\MailerInterface;
 use Thelia\Core\Template\Parser\ParserResolver;
 use Thelia\Core\Template\TemplateHelperInterface;
-use Symfony\Component\Mailer\MailerInterface;
+use Thelia\Domain\Order\Service\OrderHistoryRecorder;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Currency;
 use Thelia\Model\Product;
@@ -49,6 +50,7 @@ abstract class RestockingTestCase extends IntegrationTestCase
             $this->getService(TemplateHelperInterface::class),
             $this->getService(ParserResolver::class),
             $this->getService(MailerInterface::class),
+            $this->getService(OrderHistoryRecorder::class),
         );
 
         $this->writeConfig('store_email', 'shop@example.com');
