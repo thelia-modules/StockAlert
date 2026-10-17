@@ -46,7 +46,9 @@ final class PriceDropSubscriptionServiceTest extends PriceDropTestCase
         $alert = PriceDropAlertQuery::create()->filterByProductSaleElementsId($productSaleElements->getId())->findOne();
         self::assertNotNull($alert);
         self::assertSame($alert->getId(), $outcome->priceDropAlertId);
-        self::assertSame($alert->getExpiresAt()->getTimestamp(), $outcome->expiresAt->getTimestamp());
+        // The outcome holds the date as it was set, the alert the date as the database stored it: MySQL 8
+        // rounds the fraction of a second, MariaDB drops it, so they may be one second apart.
+        self::assertEqualsWithDelta($alert->getExpiresAt()->getTimestamp(), $outcome->expiresAt->getTimestamp(), 1);
         self::assertSame('shopper-'.$suffix.'@example.com', $alert->getEmail());
         self::assertSame(40.0, (float) $alert->getReferencePrice());
         self::assertSame(PriceDropAlert::STATUS_ACTIVE, $alert->getStatus());

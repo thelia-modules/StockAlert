@@ -33,7 +33,9 @@ final class PriceDropAlertSchemaTest extends IntegrationTestCase
     {
         [$productSaleElements, $currency] = $this->createSaleElement();
 
-        $expiresAt = new \DateTime('+180 days');
+        // The column keeps whole seconds: MySQL 8 rounds a fraction, MariaDB drops it. A date without
+        // fraction reads back the same on both.
+        $expiresAt = \DateTime::createFromFormat('Y-m-d H:i:s', (new \DateTime('+180 days'))->format('Y-m-d H:i:s'));
 
         $alert = new PriceDropAlert();
         $alert
